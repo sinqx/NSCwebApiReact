@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Text.RegularExpressions;
 using webApiReact.Models;
+using webApiReact.ViewModels;
 
 namespace webApiReact.Controllers
 {
@@ -22,7 +24,7 @@ namespace webApiReact.Controllers
 
         // GET: api/UserReport
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<UserReport>>> GetUsersReports()
+        public async Task<ActionResult<IEnumerable<UserReport>>> GetAllUserReports()
         {
             if (!await _context.UsersReports.AnyAsync())
             {
@@ -36,7 +38,7 @@ namespace webApiReact.Controllers
 
         // GET all user's reports: api/UserReport/user
         [HttpGet("user")]
-        public async Task<ActionResult<IEnumerable<UserReport>>> GetAllUserReports()
+        public async Task<ActionResult<IEnumerable<UserReport>>> GetUsersReports()
         {
 
             if (!await _context.UsersReports.AnyAsync())
@@ -47,46 +49,37 @@ namespace webApiReact.Controllers
             User user = await _userManager.GetUserAsync(User)
               ?? throw new Exception("Пользователь не найден.");
 
-            var userReports = user.UserReports;
-
-            if (userReports == null)
-            {
-                return NotFound();
-            }
-
-            return userReports.ToList();
+            return user.UserReports is null ? NotFound() : user.UserReports.ToList();
         }
 
 
-        // GET by god, kpred and month: api/UserReport/{god}/{kpred}/{month}
-        [HttpGet("{god}/{kpred}/{month}")]
-        public async Task<ActionResult<UserReport>> GetUserReportByGodYearMonth(string god, string kpred, string month)
+        // GET by god, kpred and month: api/UserReport/get
+        [HttpGet("get")]
+        public async Task<ActionResult<UserReport>> GetUserReportByYearMonthKpred(string god, string kpred, string month)
         {
-
             if (!await _context.UsersReports.AnyAsync())
             {
                 return Problem("Entity set 'APIDbContext.UsersReports' is empty.");
             }
 
-            User user = await _userManager.GetUserAsync(User)
-                ?? throw new Exception("Пользователь не найден.");
-
-            var userReport = await _context.UsersReports.FirstOrDefaultAsync(
-                report => report.GOD == god && report.K_PRED == kpred
-                && report.Month == month && report.User.Id == user.Id);
-
-            if (userReport is null)
+            if (!ValidateParameters(god, kpred, month))
             {
-                return NotFound();
+                return Problem("Неверно внесенны параметры");
             }
 
-            return userReport;
+            var userReport = await _context.UsersReports
+                .FirstOrDefaultAsync(ur => ur.GOD == god
+                && ur.K_PRED == kpred && ur.Month == month);
+
+
+
+            return userReport is null ? NotFound() : userReport;
         }
 
         // POST: api/UserReport/create
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost("create")]
-        public async Task<ActionResult<UserReport>> PostUserReport(string k_pred)
+        public async Task<ActionResult<UserReport>> SaveUserReport(string kpred)
         {
 
             if (!await _context.UsersReports.AnyAsync())
@@ -101,10 +94,15 @@ namespace webApiReact.Controllers
             var user = await _userManager.GetUserAsync(User)
                 ?? throw new Exception("Пользователь не найден.");
 
+            if (UserReportExists(user.Id, god, kpred, month))
+            {
+                return await GetUserReportByYearMonthKpred(god, kpred, month); // переотправка на страницу существующего отчёта
+            }
+
             var userReport = new UserReport
             {
                 GOD = god,
-                K_PRED = k_pred,
+                K_PRED = kpred,
                 Month = month,
                 User = user,
             };
@@ -116,26 +114,28 @@ namespace webApiReact.Controllers
         }
 
 
-        // POST: api/UserReport/createBy/{god}/{kpred}/{month}
+        // POST: api/UserReport/createBy/
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost("createBy/{god}/{kpred}/{month}")]
-        public async Task<ActionResult<UserReport>> StartPostUserReport(string god, string kpred, string month)
+        [HttpPost("createBy")]
+        public async Task<ActionResult<UserReport>> CreateByYearMonthKpredUserReport(string god, string kpred, string month)
         {
             if (!await _context.UsersReports.AnyAsync())
             {
                 return Problem("Entity set 'APIDbContext.UsersReports' is empty.");
             }
 
-            var checkUserReport = await _context.UsersReports.SingleOrDefaultAsync
-                (report => report.GOD == god && report.K_PRED == kpred && report.Month == month);
-
-            if (checkUserReport != null)
+            if (!ValidateParameters(god, kpred, month))
             {
-                return await GetUserReportByGodYearMonth(god, kpred, month); // переотправка на страницу существующего отчёта
+                return Problem("Неверно внесены параметры");
             }
 
             var user = await _userManager.GetUserAsync(User)
-                ?? throw new Exception("Пользователь не найден.");
+               ?? throw new Exception("Пользователь не найден.");
+
+            if (UserReportExists(user.Id, god, kpred, month))
+            {
+                return await GetUserReportByYearMonthKpred(god, kpred, month); // переотправка на страницу существующего отчёта
+            }
 
             var userReport = new UserReport
             {
@@ -152,10 +152,10 @@ namespace webApiReact.Controllers
         }
 
 
-        // PUT: api/UserReport/5
+        // PUT: api/UserReport/save
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{userId}")]
-        public async Task<IActionResult> PutUserReport(UserReport userReport)
+        [HttpPut("save")]
+        public async Task<IActionResult> SaveUserReport(UserReport userReport)
         {
             if (!await _context.UsersReports.AnyAsync())
             {
@@ -178,7 +178,7 @@ namespace webApiReact.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!UserReportExists(user.Id))
+                if (!UserReportExists(user.Id, userReport.GOD, userReport.K_PRED, userReport.Month))
                 {
                     return NotFound();
                 }
@@ -201,6 +201,11 @@ namespace webApiReact.Controllers
                 return Problem("Entity set 'APIDbContext.UsersReports' is empty.");
             }
 
+            if (!ValidateParameters(god, kpred, month))
+            {
+                return Problem("Неверно внесены параметры");
+            }
+
             var user = await _userManager.GetUserAsync(User)
                 ?? throw new Exception("Пользователь не найден.");
 
@@ -219,9 +224,20 @@ namespace webApiReact.Controllers
             return NoContent();
         }
 
-        private bool UserReportExists(string userId)
+        private bool UserReportExists(string userId, string god, string kpred, string month)
         {
-            return (_context.UsersReports?.Any(e => e.User.Id == userId)).GetValueOrDefault();
+            return _context.UsersReports?.Any(e => e.User.Id == userId
+            && e.GOD == god && e.K_PRED == kpred && e.Month == month) ?? false;
+        }
+
+        private static bool ValidateParameters(string god, string kpred, string month)
+        {
+            bool isGodValid = Regex.IsMatch(god, @"^\d{4}$");
+            bool isKpredValid = Regex.IsMatch(kpred, @"^\d{8}$");
+            bool isMonthValid = Regex.IsMatch(month, @"^\d{1,2}$");
+
+            return isGodValid && isKpredValid && isMonthValid;
         }
     }
+
 }

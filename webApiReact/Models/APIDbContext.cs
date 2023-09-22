@@ -10,14 +10,9 @@ namespace webApiReact.Models
         { 
         }
 
-        public DbSet<User> Users { get; set; }
+        public override DbSet<User> Users { get; set; }
         public DbSet<UserUID> UsersUIDs { get; set; }
         public DbSet<UserReport> UsersReports { get; set; }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder.UseLazyLoadingProxies();
-        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
