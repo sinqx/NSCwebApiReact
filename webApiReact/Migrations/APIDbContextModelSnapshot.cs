@@ -18,9 +18,6 @@ namespace webApiReact.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "8.0.0-rc.1.23419.6")
-                .HasAnnotation("Proxies:ChangeTracking", false)
-                .HasAnnotation("Proxies:CheckEquality", false)
-                .HasAnnotation("Proxies:LazyLoading", true)
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -171,11 +168,17 @@ namespace webApiReact.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Email")
+                        .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
+
+                    b.Property<string>("K_PRED")
+                        .IsRequired()
+                        .HasMaxLength(8)
+                        .HasColumnType("char(8)");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
@@ -207,11 +210,9 @@ namespace webApiReact.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("UserName")
+                        .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
-
-                    b.Property<int?>("UserUIDCode")
-                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -222,8 +223,6 @@ namespace webApiReact.Migrations
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex")
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
-
-                    b.HasIndex("UserUIDCode");
 
                     b.ToTable("AspNetUsers", (string)null);
                 });
@@ -332,23 +331,6 @@ namespace webApiReact.Migrations
                     b.ToTable("UsersReports");
                 });
 
-            modelBuilder.Entity("webApiReact.Models.UserUID", b =>
-                {
-                    b.Property<int>("Code")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Code"));
-
-                    b.Property<string>("PositionName")
-                        .IsRequired()
-                        .HasColumnType("varchar(30)");
-
-                    b.HasKey("Code");
-
-                    b.ToTable("UsersUIDs");
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -400,15 +382,6 @@ namespace webApiReact.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("webApiReact.Models.User", b =>
-                {
-                    b.HasOne("webApiReact.Models.UserUID", "UserUID")
-                        .WithMany("User")
-                        .HasForeignKey("UserUIDCode");
-
-                    b.Navigation("UserUID");
-                });
-
             modelBuilder.Entity("webApiReact.Models.UserReport", b =>
                 {
                     b.HasOne("webApiReact.Models.User", "User")
@@ -423,11 +396,6 @@ namespace webApiReact.Migrations
             modelBuilder.Entity("webApiReact.Models.User", b =>
                 {
                     b.Navigation("UserReports");
-                });
-
-            modelBuilder.Entity("webApiReact.Models.UserUID", b =>
-                {
-                    b.Navigation("User");
                 });
 #pragma warning restore 612, 618
         }

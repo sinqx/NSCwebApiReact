@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using webApiReact.Models;
+using webApiReact.ViewModels;
 
 namespace webApiReact.Controllers
 {
@@ -9,20 +11,22 @@ namespace webApiReact.Controllers
     public class UserController : ControllerBase
     {
         private readonly APIDbContext _context;
+        private readonly UserManager<User> _userManager;
 
-        public UserController(APIDbContext context)
+        public UserController(APIDbContext context, UserManager<User> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: api/User
         [HttpGet]
         public async Task<ActionResult<IEnumerable<User>>> GetUsers()
         {
-          if (_context.Users == null)
-          {
-              return NotFound();
-          }
+            if (_context.Users == null)
+            {
+                return NotFound();
+            }
             return await _context.Users.ToListAsync();
         }
 
@@ -30,10 +34,10 @@ namespace webApiReact.Controllers
         [HttpGet("get/{id}")]
         public async Task<ActionResult<User>> GetUser(int id)
         {
-          if (_context.Users == null)
-          {
-              return NotFound();
-          }
+            if (_context.Users == null)
+            {
+                return NotFound();
+            }
             var user = await _context.Users.FindAsync(id);
 
             if (user == null)
@@ -77,38 +81,39 @@ namespace webApiReact.Controllers
 
         // POST: api/User
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost("new")]
-        public async Task<ActionResult<User>> PostUser(User user)
+        [HttpPost("register")]
+        public async Task<IActionResult> Register(RegistrationtViewModel model)
         {
-          if (_context.Users == null)
-          {
-              return Problem("Entity set 'APIDbContext.Users'  is null.");
-          }
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
+            if (ModelState.IsValid)
+            {
+                var user = new User
+                {
+                    K_PRED = model.K_PRED,
+                    Email = model.Email,
+                    UserName = model.UserName
+                };
 
-            return CreatedAtAction("GetUser", new { id = user.Id }, user);
+                var result = await _userManager.CreateAsync(user, model.Password);
+
+                if (result.Succeeded)
+                {
+                    // Пользователь успешно зарегистрирован
+                    return Ok();
+                }
+                else
+                {
+                    // Обработка ошибок при регистрации пользователя
+                    foreach (var error in result.Errors)
+                    {
+                        ModelState.AddModelError(string.Empty, error.Description);
+                    }
+                }
+            }
+
+            // Некорректная модель данных, возвращаем ошибку
+            return BadRequest(ModelState);
         }
 
-        // DELETE: api/User/5
-        [HttpDelete("delete/{id}")]
-        public async Task<IActionResult> DeleteUser(int id)
-        {
-            if (_context.Users == null)
-            {
-                return NotFound();
-            }
-            var user = await _context.Users.FindAsync(id);
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            _context.Users.Remove(user);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
 
         private bool UserExists(string id)
         {
