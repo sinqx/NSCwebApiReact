@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace webApiReact.Migrations
 {
     /// <inheritdoc />
-    public partial class initialstart : Migration
+    public partial class initialcreation : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -162,7 +162,7 @@ namespace webApiReact.Migrations
                 columns: table => new
                 {
                     GOD = table.Column<string>(type: "char(4)", nullable: false),
-                    Month = table.Column<string>(type: "char(2)", nullable: false),
+                    Kvartal = table.Column<string>(type: "char(1)", nullable: false),
                     K_PRED = table.Column<string>(type: "char(8)", nullable: false),
                     INDGR = table.Column<bool>(type: "bit", nullable: true),
                     E001 = table.Column<bool>(type: "bit", nullable: true),
@@ -190,12 +190,11 @@ namespace webApiReact.Migrations
                     P1 = table.Column<long>(type: "bigint", nullable: true),
                     E002 = table.Column<bool>(type: "bit", nullable: true),
                     E003 = table.Column<bool>(type: "bit", nullable: true),
-                    Kvartal = table.Column<string>(type: "char(1)", nullable: false),
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UsersReports", x => new { x.GOD, x.K_PRED, x.Month });
+                    table.PrimaryKey("PK_UsersReports", x => new { x.GOD, x.Kvartal, x.K_PRED });
                     table.ForeignKey(
                         name: "FK_UsersReports_AspNetUsers_UserId",
                         column: x => x.UserId,

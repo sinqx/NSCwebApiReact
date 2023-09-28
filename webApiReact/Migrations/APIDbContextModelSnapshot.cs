@@ -232,11 +232,11 @@ namespace webApiReact.Migrations
                     b.Property<string>("GOD")
                         .HasColumnType("char(4)");
 
+                    b.Property<string>("Kvartal")
+                        .HasColumnType("char(1)");
+
                     b.Property<string>("K_PRED")
                         .HasColumnType("char(8)");
-
-                    b.Property<string>("Month")
-                        .HasColumnType("char(2)");
 
                     b.Property<short?>("CAPIExported")
                         .HasColumnType("smallint");
@@ -264,10 +264,6 @@ namespace webApiReact.Migrations
 
                     b.Property<long?>("K_NPO")
                         .HasColumnType("bigint");
-
-                    b.Property<string>("Kvartal")
-                        .IsRequired()
-                        .HasColumnType("char(1)");
 
                     b.Property<long?>("P1")
                         .HasColumnType("bigint");
@@ -324,7 +320,7 @@ namespace webApiReact.Migrations
                     b.Property<string>("user_REVIEW")
                         .HasColumnType("varchar(50)");
 
-                    b.HasKey("GOD", "K_PRED", "Month");
+                    b.HasKey("GOD", "Kvartal", "K_PRED");
 
                     b.HasIndex("UserId");
 

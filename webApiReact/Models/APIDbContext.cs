@@ -17,7 +17,7 @@ namespace webApiReact.Models
         {
             modelBuilder.ApplyConfiguration(new UserEntityConfiguration());
             modelBuilder.Entity<UserReport>()
-                .HasKey(e => new { e.GOD, e.K_PRED, e.Month });
+                .HasKey(e => new { e.GOD, e.Kvartal, e.K_PRED });
             base.OnModelCreating(modelBuilder);
         }
 
