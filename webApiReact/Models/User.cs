@@ -11,7 +11,7 @@ namespace webApiReact.Models
         public override string Id { get; set; }
 
         [Column(TypeName = "char(8)")]
-        public string K_PRED { get; set; }
+        public int K_PRED { get; set; }
 
         [Required]
         public override string Email { get; set; }

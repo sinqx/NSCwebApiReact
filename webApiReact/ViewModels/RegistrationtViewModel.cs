@@ -7,7 +7,7 @@ namespace webApiReact.ViewModels
     public class RegistrationtViewModel
     {
         [Required]
-        public string K_PRED { get; set; }
+        public int K_PRED { get; set; }
 
         [Required]
         [EmailAddress]
