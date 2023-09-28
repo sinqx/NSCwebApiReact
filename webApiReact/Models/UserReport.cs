@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace webApiReact.Models
 {
@@ -94,6 +95,7 @@ namespace webApiReact.Models
         [Column(TypeName = "char(1)")]
         public char Kvartal { get; set; }
 
+        [JsonIgnore]
         [Required]
         public virtual User User { get; set; }
     }

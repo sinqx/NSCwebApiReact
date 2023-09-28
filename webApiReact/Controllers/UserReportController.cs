@@ -41,24 +41,15 @@ namespace webApiReact.Controllers
         // GET all user's reports: api/UserReport/user
         // Получение всех отчётов пользователя
         [HttpGet("user")]
-        public async Task<ActionResult<IEnumerable<object>>> GetUsersReports()
+        public async Task<ActionResult<IEnumerable<UserReport>>> GetUsersReports()
         {
             // Получение текущего пользователя
             User user = await _userManager.GetUserAsync(User)
                 ?? throw new Exception("Пользователь не найден.");
 
             // Получение всех отчётов пользователя из базы данных
-            // В ответе ожидается JSON ответ с отчётами и определёнными данными пользователя:
-            // ID, Email, Username
             var userReports = await _context.UsersReports
                 .Where(ur => ur.K_PRED == user.K_PRED)
-                .Include(ur => ur.User)
-                .Select(ur => new
-                {
-                    UserId = ur.User.Id,
-                    UserEmail = ur.User.Email,
-                    ur.User.UserName
-                })
                 .ToListAsync();
 
             // Возвращение списка отчётов пользователя или сообщения о их отсутствии
@@ -68,11 +59,18 @@ namespace webApiReact.Controllers
         }
 
 
-        /// GET by god, kpred and month: api/UserReport/get
+        /// GET by god and month: api/UserReport/get
         // Получение отчёта по году, КПРЭД и месяцу
         [HttpGet("get")]
-        public async Task<ActionResult<UserReport>> GetUserReportByYearMonthKpred(string god, string kpred, string month)
+        public async Task<ActionResult<UserReport>> GetUserReportByYearMonth(string god, string month)
         {
+            // Получение текущего пользователя
+            var user = await _userManager.GetUserAsync(User)
+              ?? throw new Exception("Пользователь не найден.");
+
+            //Записывай Код предприятия пользователя
+            string kpred = user.K_PRED;
+
             // Проверка валидности переданных параметров
             if (!ValidateParameters(god, kpred, month))
             {
@@ -85,29 +83,33 @@ namespace webApiReact.Controllers
 
             // Если отчёт не найден, создание нового отчёта, иначе выдача нужного Отчёта
             return userReport is null
-                ? await CreateByYearMonthKpredUserReport(god, kpred, month)
+                ? await CreateByYearMonthKpredUserReport(god, month)
                 : userReport;
         }
 
         /// POST by kpred : api/UserReport/create
         // Создание нового отчёта
         [HttpPost("create")]
-        public async Task<ActionResult<UserReport>> SaveUserReport(string kpred)
+        public async Task<ActionResult<UserReport>> SaveUserReport()
         {
             // Получение текущего года и месяца
             string god = DateTime.Now.ToString("yyyy");
             string month = DateTime.Now.Month.ToString();
 
+            // Получение текущего пользователя
+            var user = await _userManager.GetUserAsync(User)
+              ?? throw new Exception("Пользователь не найден."); 
+
+            //Записывай Код предприятия пользователя
+            string kpred = user.K_PRED; 
+
             // Проверка, существует ли уже UserReport с заданным годом, kpred и месяцем
             if (UserReportExists(god, kpred, month))
             {
-                return await GetUserReportByYearMonthKpred(god, kpred, month);
+                return await GetUserReportByYearMonth(god, month);
                 // Перенаправление на страницу существующего отчета
             }
 
-            // Получение текущего пользователя
-            var user = await _userManager.GetUserAsync(User)
-              ?? throw new Exception("Пользователь не найден."); // Пользователь не найден
 
             // Создание нового объекта UserReport
             var userReport = new UserReport
@@ -130,22 +132,25 @@ namespace webApiReact.Controllers
         /// POST: api/UserReport/createBy
         // Создание отчёта по году, КПРЭД и месяцу
         [HttpPost("createBy")]
-        public async Task<ActionResult<UserReport>> CreateByYearMonthKpredUserReport(string god, string kpred, string month)
+        public async Task<ActionResult<UserReport>> CreateByYearMonthKpredUserReport(string god, string month)
         {
+            // Получение текущего пользователя
+            var user = await _userManager.GetUserAsync(User)
+               ?? throw new Exception("Пользователь не найден.");
+
+            var kpred = user.K_PRED;
+
             // Проверка параметров
             if (!ValidateParameters(god, kpred, month))
             {
                 return Problem("Неверно внесены параметры");
             }
 
-            // Получение текущего пользователя
-            var user = await _userManager.GetUserAsync(User)
-               ?? throw new Exception("Пользователь не найден.");
 
             // Проверка, существует ли уже отчет пользователя для указанных параметров
             if (UserReportExists(god, kpred, month))
             {
-                return await GetUserReportByYearMonthKpred(god, kpred, month); // Перенаправление на страницу существующего отчета
+                return await GetUserReportByYearMonth(god, month); // Перенаправление на страницу существующего отчета
             }
 
             // Создание нового отчета пользователя
@@ -254,7 +259,7 @@ namespace webApiReact.Controllers
         {
             bool isGodValid = Regex.IsMatch(god, @"^\d{4}$");
             bool isKpredValid = Regex.IsMatch(kpred, @"^\d{8}$");
-            bool isMonthValid = Regex.IsMatch(month, @"^\d{1,2}$");
+            bool isMonthValid = int.TryParse(month, out int monthValue) && monthValue >= 1 && monthValue <= 12;
 
             return isGodValid && isKpredValid && isMonthValid;
         }
