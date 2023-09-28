@@ -1,8 +1,12 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.JsonPatch.Adapters;
+using Microsoft.AspNetCore.JsonPatch;
 using System.Text.RegularExpressions;
 using webApiReact.Models;
+using System.Text.Json;
+using System;
 
 namespace webApiReact.Controllers
 {
@@ -24,7 +28,7 @@ namespace webApiReact.Controllers
         }
 
 
-        // GET: api/UserReport
+        /// GET: api/UserReport
         // Получение всех отчётов пользователей
         [HttpGet]
         public async Task<ActionResult<IEnumerable<UserReport>>> GetAllUserReports()
@@ -38,7 +42,7 @@ namespace webApiReact.Controllers
 
 
 
-        // GET all user's reports: api/UserReport/user
+        /// GET all user's reports: api/UserReport/user
         // Получение всех отчётов пользователя
         [HttpGet("user")]
         public async Task<ActionResult<IEnumerable<UserReport>>> GetUsersReports()
@@ -52,38 +56,39 @@ namespace webApiReact.Controllers
                 .Where(ur => ur.K_PRED == user.K_PRED)
                 .ToListAsync();
 
-            // Возвращение списка отчётов пользователя или сообщения о их отсутствии
+            // Возвращение списка от    чётов пользователя или сообщения о их отсутствии
             return userReports is null
                 ? NotFound($"У пользователя {user.Id}: {user.UserName} отчётов не найдено")
                 : userReports;
         }
 
 
-        /// GET by god and month: api/UserReport/get
+        /// GET by god and kvartal: api/UserReport/get
         // Получение отчёта по году, КПРЭД и месяцу
         [HttpGet("get")]
-        public async Task<ActionResult<UserReport>> GetUserReportByYearMonth(string god, string month)
+        public async Task<ActionResult<UserReport>> GetUserReportByYearKvartal(int god, char kvartal)
         {
             // Получение текущего пользователя
             var user = await _userManager.GetUserAsync(User)
               ?? throw new Exception("Пользователь не найден.");
 
             //Записывай Код предприятия пользователя
-            string kpred = user.K_PRED;
+            int kpred = user.K_PRED;
 
             // Проверка валидности переданных параметров
-            if (!ValidateParameters(god, kpred, month))
+            if (!ValidateParameters(god, kpred, kvartal))
             {
                 return Problem("Неверно внесены параметры.");
             }
 
             // Поиск отчёта по году, КПРЭД и месяцу
-            var userReport = await _context.UsersReports
-                .FirstOrDefaultAsync(ur => ur.GOD == god && ur.K_PRED == kpred && ur.Month == month);
+            var userReport = await _context.UsersReports.SingleOrDefaultAsync(
+               report => report.GOD == god && report.K_PRED == user.K_PRED
+               && report.Kvartal == kvartal);
 
             // Если отчёт не найден, создание нового отчёта, иначе выдача нужного Отчёта
             return userReport is null
-                ? await CreateByYearMonthKpredUserReport(god, month)
+                ? await CreateByYearKvartalUserReport(god, kvartal)
                 : userReport;
         }
 
@@ -93,20 +98,21 @@ namespace webApiReact.Controllers
         public async Task<ActionResult<UserReport>> SaveUserReport()
         {
             // Получение текущего года и месяца
-            string god = DateTime.Now.ToString("yyyy");
-            string month = DateTime.Now.Month.ToString();
+            int god = DateTime.Now.Year;
+            int month = DateTime.Now.Month;
+            char kvartal = (char)(((month + 2) / 3) + '0');
 
             // Получение текущего пользователя
             var user = await _userManager.GetUserAsync(User)
-              ?? throw new Exception("Пользователь не найден."); 
+              ?? throw new Exception("Пользователь не найден.");
 
             //Записывай Код предприятия пользователя
-            string kpred = user.K_PRED; 
+            int kpred = user.K_PRED;
 
             // Проверка, существует ли уже UserReport с заданным годом, kpred и месяцем
-            if (UserReportExists(god, kpred, month))
+            if (UserReportExists(god, kpred, kvartal))
             {
-                return await GetUserReportByYearMonth(god, month);
+                return await GetUserReportByYearKvartal(god, kvartal);
                 // Перенаправление на страницу существующего отчета
             }
 
@@ -116,7 +122,7 @@ namespace webApiReact.Controllers
             {
                 GOD = god,
                 K_PRED = kpred,
-                Month = month,
+                Kvartal = kvartal,
                 User = user,
             };
 
@@ -130,27 +136,27 @@ namespace webApiReact.Controllers
 
 
         /// POST: api/UserReport/createBy
-        // Создание отчёта по году, КПРЭД и месяцу
+        // Создание отчёта по году, КПРЭД и кварталу
         [HttpPost("createBy")]
-        public async Task<ActionResult<UserReport>> CreateByYearMonthKpredUserReport(string god, string month)
+        public async Task<ActionResult<UserReport>> CreateByYearKvartalUserReport(int god, char kvartal)
         {
             // Получение текущего пользователя
             var user = await _userManager.GetUserAsync(User)
                ?? throw new Exception("Пользователь не найден.");
 
-            var kpred = user.K_PRED;
+            int kpred = user.K_PRED;
 
             // Проверка параметров
-            if (!ValidateParameters(god, kpred, month))
+            if (!ValidateParameters(god, kpred, kvartal))
             {
                 return Problem("Неверно внесены параметры");
             }
 
 
             // Проверка, существует ли уже отчет пользователя для указанных параметров
-            if (UserReportExists(god, kpred, month))
+            if (UserReportExists(god, kpred, kvartal))
             {
-                return await GetUserReportByYearMonth(god, month); // Перенаправление на страницу существующего отчета
+                return await GetUserReportByYearKvartal(god, kvartal); // Перенаправление на страницу существующего отчета
             }
 
             // Создание нового отчета пользователя
@@ -158,7 +164,7 @@ namespace webApiReact.Controllers
             {
                 GOD = god,
                 K_PRED = kpred,
-                Month = month,
+                Kvartal = kvartal,
                 User = user,
             };
 
@@ -169,57 +175,99 @@ namespace webApiReact.Controllers
             return userReport;
         }
 
-
-        // PUT: api/UserReport/save
-        // Обновление отчёта пользователя
-        [HttpPut("change")]
-        public async Task<IActionResult> ChangeUserReport(UserReport userReport)
+        /// PUT: api/UserReport/replace
+        // Полное обновление отчёта пользователя
+        [HttpPut("replace")]
+        public async Task<ActionResult<UserReport>> ReplaceUserReport(UserReport newReport)
         {
-            // Получаем текущего пользователя 
-            var user = await _userManager.GetUserAsync(User)
-            ?? throw new Exception("Пользователь не найден.");
+            var user = await _userManager.GetUserAsync(User) 
+                ?? throw new Exception("Пользователь не найден.");
 
-            // Проверяем, что идентификатор пользователя в отчёте совпадает с идентификатором текущего пользователя
-            if (userReport.User.Id != user.Id)
+            var existingReport = await _context.UsersReports.SingleOrDefaultAsync(
+                report => report.GOD == newReport.GOD && report.K_PRED == user.K_PRED 
+                && report.Kvartal == newReport.Kvartal);
+
+            if (existingReport == null)
             {
-                return BadRequest("Ошибка. Вызов неверного отчёта");
+                return NotFound("Такого отчета не существует");
             }
+            newReport.User = user;
 
-            // Устанавливаем состояние сущности userReport в Modified, чтобы отметить её как изменённую.
-            _context.Entry(userReport).State = EntityState.Modified;
+            // Заменяем существующий отчёт новым отчётом
+            _context.Entry(existingReport).CurrentValues.SetValues(newReport);
+            await _context.SaveChangesAsync();
 
-            try
-            {
-                // Сохраняем изменения в базе данных.
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                // Мы проверяем, существует ли отчёт с указанными значениями полей GOD, K_PRED и Month.
-                // Если отчёт не существует, возвращаем ошибку NotFound с сообщением.
-                // В противном случае, пробрасываем исключение дальше.
-                if (!UserReportExists(userReport.GOD, userReport.K_PRED, userReport.Month))
-                {
-                    return NotFound("Такого отчёта не существует");
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            // Если сохранение прошло успешно, возвращаем ответ NoContent (код 204) без тела ответа.
-            return NoContent();
+            return newReport;
         }
 
 
-        // DELETE: api/UserReport/delete/{god}/{kpred}/{month}
+        /// PATCH: api/UserReport/change
+        // Динамическое обновление отчёта пользователя
+        [HttpPatch("change")]
+        public async Task<ActionResult<UserReport>> UpdateUserReport(int god, char kvartal, IDictionary<string, object> parameters)
+        {
+            var user = await _userManager.GetUserAsync(User) ?? throw new Exception("Пользователь не найден.");
+
+            var userReport = await _context.UsersReports.SingleOrDefaultAsync(report =>
+                report.GOD == god && report.K_PRED == user.K_PRED && report.Kvartal == kvartal);
+
+            if (userReport == null)
+            {
+                return NotFound("Такого отчета не существует");
+            }
+
+            foreach (var parameter in parameters)
+            {
+                var lowercaseParameterName = parameter.Key.ToLower();
+                if (lowercaseParameterName != "god" && lowercaseParameterName != "kvartal" && lowercaseParameterName != "k_pred")
+                {
+                    var property = userReport.GetType().GetProperty(lowercaseParameterName);
+                    if (property != null && property.CanWrite 
+                        && property.Name.ToLower() != "god" 
+                        && property.Name.ToLower() != "kvartal" 
+                        && property.Name.ToLower() != "k_pred")
+                    {
+                        switch (property.PropertyType)
+                        {
+                            case Type boolType when parameter.Value is JsonElement jsonElement
+                            && (jsonElement.ValueKind == JsonValueKind.True
+                            || jsonElement.ValueKind == JsonValueKind.False):
+                                property.SetValue(userReport, jsonElement.GetBoolean());
+                                break;
+                            case Type stringType when parameter.Value is JsonElement jsonElement
+                            && jsonElement.ValueKind == JsonValueKind.String:
+                                property.SetValue(userReport, jsonElement.GetString());
+                                break;
+                            case Type dateTimeType when parameter.Value is JsonElement dateTimeElement
+                            && dateTimeElement.ValueKind == JsonValueKind.String
+                            && DateTime.TryParse(dateTimeElement.GetString(), out var dateTimeValue):
+                                property.SetValue(userReport, dateTimeValue);
+                                break;
+                            case Type intType when parameter.Value is JsonElement intElement
+                            && intElement.ValueKind == JsonValueKind.Number
+                            && intElement.TryGetInt32(out var intValue):
+                                property.SetValue(userReport, intValue);
+                                break;
+                            default:
+                                property.SetValue(userReport, parameter.Value);
+                                break;
+                        }
+                    }
+                }
+            }
+            await _context.SaveChangesAsync();
+
+            return userReport;
+        }
+
+
+        // DELETE: api/UserReport/delete/{god}/{kpred}/{kvartal}
         // Удаление отчёта пользователя по указанным значениям
-        [HttpDelete("delete/{god}/{kpred}/{month}")]
-        public async Task<IActionResult> DeleteUserReport(string god, string kpred, string month)
+        [HttpDelete("delete")]
+        public async Task<IActionResult> DeleteUserReport(int god, int kpred, char kvartal)
         {
             // Проверка валидности переданных параметров
-            if (!ValidateParameters(god, kpred, month))
+            if (!ValidateParameters(god, kpred, kvartal))
             {
                 return Problem("Неверно внесены параметры");
             }
@@ -231,7 +279,7 @@ namespace webApiReact.Controllers
             // Ищем отчёт пользователя по указанным значениям 
             var userReport = await _context.UsersReports.SingleOrDefaultAsync(
                 report => report.GOD == god && report.K_PRED == kpred
-                && report.Month == month && report.User.Id == user.Id);
+                && report.Kvartal == kvartal && report.User.Id == user.Id);
 
             // Если отчёт не найден, возвращаем ошибку NotFound с сообщением.
             if (userReport == null)
@@ -248,20 +296,20 @@ namespace webApiReact.Controllers
         }
 
         //Проверка, существует ли отчёт с такими параметрами
-        private bool UserReportExists(string god, string kpred, string month)
+        private bool UserReportExists(int god, int kpred, char kvartal)
         {
             return _context.UsersReports?.Any(e => e.GOD == god
-            && e.K_PRED == kpred && e.Month == month) ?? false;
+            && e.K_PRED == kpred && e.Kvartal == kvartal) ?? false;
         }
 
         //Проверка на нужное количество цифр в параметрах
-        private static bool ValidateParameters(string god, string kpred, string month)
+        private static bool ValidateParameters(int god, int kpred, char kvartal)
         {
-            bool isGodValid = Regex.IsMatch(god, @"^\d{4}$");
-            bool isKpredValid = Regex.IsMatch(kpred, @"^\d{8}$");
-            bool isMonthValid = int.TryParse(month, out int monthValue) && monthValue >= 1 && monthValue <= 12;
+            bool isGodValid = Regex.IsMatch(god.ToString(), @"^\d{4}$");
+            bool isKpredValid = Regex.IsMatch(kpred.ToString(), @"^\d{8}$");
+            bool isKvartalhValid = Regex.IsMatch(kvartal.ToString(), @"^\d{1}$");
 
-            return isGodValid && isKpredValid && isMonthValid;
+            return isGodValid && isKpredValid && isKvartalhValid;
         }
     }
 
