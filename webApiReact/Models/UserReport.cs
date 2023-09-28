@@ -9,15 +9,15 @@ namespace webApiReact.Models
 
         [Required]
         [Column(TypeName = "char(4)")]
-        public string GOD { get; set; }
+        public int GOD { get; set; }
 
         [Required]
-        [Column(TypeName = "char(2)")]
-        public string Month { get; set; }
+        [Column(TypeName = "char(1)")]
+        public char Kvartal { get; set; }
 
         [Required]
         [Column(TypeName = "char(8)")]
-        public string K_PRED { get; set; }
+        public int K_PRED { get; set; }
 
         [Column(TypeName = "bit")]
         public bool? INDGR { get; set; }
@@ -91,9 +91,6 @@ namespace webApiReact.Models
 
         [Column(TypeName = "bit")]
         public bool? E003 { get; set; }
-
-        [Column(TypeName = "char(1)")]
-        public char Kvartal { get; set; }
 
         [JsonIgnore]
         [Required]
