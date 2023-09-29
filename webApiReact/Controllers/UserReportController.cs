@@ -56,7 +56,7 @@ namespace webApiReact.Controllers
                 .Where(ur => ur.K_PRED == user.K_PRED)
                 .ToListAsync();
 
-            // Возвращение списка от    чётов пользователя или сообщения о их отсутствии
+            // Возвращение списка отчётов пользователя или сообщения о их отсутствии
             return userReports is null
                 ? NotFound($"У пользователя {user.Id}: {user.UserName} отчётов не найдено")
                 : userReports;
@@ -64,7 +64,7 @@ namespace webApiReact.Controllers
 
 
         /// GET by god and kvartal: api/UserReport/get
-        // Получение отчёта по году, КПРЭД и месяцу
+        // Получение отчёта по году и кварталу
         [HttpGet("get")]
         public async Task<ActionResult<UserReport>> GetUserReportByYearKvartal(int god, char kvartal)
         {
@@ -95,7 +95,7 @@ namespace webApiReact.Controllers
         /// POST by kpred : api/UserReport/create
         // Создание нового отчёта
         [HttpPost("create")]
-        public async Task<ActionResult<UserReport>> SaveUserReport()
+        public async Task<ActionResult<UserReport>> CreateUserReport()
         {
             // Получение текущего года и месяца
             int god = DateTime.Now.Year;
@@ -292,7 +292,7 @@ namespace webApiReact.Controllers
             await _context.SaveChangesAsync();
 
             // Возвращаем ответ NoContent (код 204) без тела ответа.
-            return NoContent();
+            return Ok("Отчёт удалён");
         }
 
         //Проверка, существует ли отчёт с такими параметрами
