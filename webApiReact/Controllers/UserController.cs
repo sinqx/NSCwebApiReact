@@ -12,11 +12,13 @@ namespace webApiReact.Controllers
     {
         private readonly APIDbContext _context;
         private readonly UserManager<User> _userManager;
+        private readonly SignInManager<User> _signInManager;
 
-        public UserController(APIDbContext context, UserManager<User> userManager)
+        public UserController(APIDbContext context, UserManager<User> userManager, SignInManager<User> signInManager)
         {
             _context = context;
             _userManager = userManager;
+            _signInManager = signInManager;
         }
 
         // GET: api/User
@@ -114,6 +116,38 @@ namespace webApiReact.Controllers
             return BadRequest(ModelState);
         }
 
+
+        // POST: api/User/login
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginViewModel model)
+        {
+            var user = await _userManager.FindByNameAsync(model.UserName);
+            if (user == null)
+            {
+                // Пользователь не найден
+                return BadRequest("Invalid username or password");
+            }
+
+            var result = await _signInManager.CheckPasswordSignInAsync(user, model.Password, lockoutOnFailure: false);
+            if (result.Succeeded)
+            {
+                // Успешная аутентификация
+                var info = new
+                {
+                    Username = user.UserName,
+                    Email = user.Email,
+                    PhoneNumber = user.PhoneNumber
+                };
+
+                return Ok(info);
+            }
+            else
+            {
+                // Неудачная аутентификация
+                return BadRequest("Invalid username or password");
+            }
+        }
 
         private bool UserExists(string id)
         {
