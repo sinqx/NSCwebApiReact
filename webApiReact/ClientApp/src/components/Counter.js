@@ -16,7 +16,7 @@ export class Counter extends Component {
   }
 
   render() {
-    return (
+      return (
       <div>
         <h1>Counter</h1>
 
