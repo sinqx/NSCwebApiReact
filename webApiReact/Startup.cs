@@ -8,6 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddControllers()
+    .AddControllersAsServices()
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
@@ -46,6 +47,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.MapControllerRoute(
+    name: "default",
+    pattern: "api/{controller}/{action}/{id?}");
 
 app.MapIdentityApi<User>();
 
