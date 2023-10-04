@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
+import "./UserReports.css";
 
 const UserReports = () => {
   const [reports, setReports] = useState([]);
@@ -11,7 +12,6 @@ const UserReports = () => {
       .then(function (response) {
         // handle success
         setReports(response.data);
-        console.log(response.data);
       })
       .catch(function (error) {
         // handle error
@@ -21,43 +21,37 @@ const UserReports = () => {
 
   const getUserReportLink = (report) => {
     const { god, kvartal, k_PRED } = report;
-    console.log(god);
-    return `/UserReports/getInfo/${god}/${k_PRED}/${kvartal}`;
+    return {
+      pathname: `/UserReport/getInfo/${god}/${kvartal}/${k_PRED}`,
+    };
   };
-
   return (
     <div>
-      <h1>Национальный Статистический Комитет</h1>
-      <div className="container">
-        <div className="row">
-          {reports.length > 0 ? (
-            reports.map((report) => (
-              <div
-                className="col-md-4"
-                key={`${report.GOD}_${report.kvartal}_${report.k_pred}`}
-              >
-                <div className="card mb-3">
-                  <div className="card-body">
-                    <h5 className="card-title">
-                      Дата: {report.GOD}, квартал #{report.kvartal}
-                    </h5>
-                    <p className="card-text">
-                      Код предприятия: {report.k_pred}
-                    </p>
-                    <Link
-                      to={getUserReportLink(report)}
-                      className="btn btn-primary"
-                    >
-                      Подробнее
-                    </Link>
-                  </div>
-                </div>
+      <h1>Отчёты</h1>
+      <div className="report_container">
+        {reports.length > 0 ? (
+          reports.map((report) => (
+            <div
+              className="card mb-3"
+              key={`${report.god}_${report.kvartal}_${report.k_PRED}`}
+            >
+              <div className="card-body">
+                <h5 className="card-title">
+                  {report.kvartal} Квартал - {report.god}
+                </h5>
+                <p className="card-text">Код предприятия: {report.k_PRED}</p>
+                <Link
+                  to={getUserReportLink(report)}
+                  className="btn btn-primary"
+                >
+                  Подробнее
+                </Link>
               </div>
-            ))
-          ) : (
-            <p>Данные отчетов загружаются...</p>
-          )}
-        </div>
+            </div>
+          ))
+        ) : (
+          <p>Данные отчетов загружаются...</p>
+        )}
       </div>
     </div>
   );
