@@ -1,5 +1,4 @@
-import { Counter } from "./components/Counter";
-import { FetchData } from "./components/FetchData";
+
 import { Home } from "./components/Home";
 import UserReports from "./components/UserReports"
 import UserReportInfo from "./components/UserReportInfo"
@@ -10,23 +9,15 @@ const AppRoutes = [
         element: <Home />
     },
     {
-        path: '/counter',
-        element: <Counter />
-    },
-    {
-        path: '/fetch-data',
-        element: <FetchData />
-    },
-    {
-        path: '/UserReports',
+        path: 'api/UserReports',
         element: <UserReports />
     },
     {
-        path: '/UserReports/getInfo/:god/:k_PRED/:kvartal',
+        path: '/UserReport/getInfo/:god/:kvartal/:k_PRED',
         element: <UserReportInfo />
     }
     
-
+    
 ];
 
 export default AppRoutes;
