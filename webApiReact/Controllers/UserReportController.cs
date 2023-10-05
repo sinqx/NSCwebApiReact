@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.JsonPatch.Adapters;
-using Microsoft.AspNetCore.JsonPatch;
 using System.Text.RegularExpressions;
 using webApiReact.Models;
 using System.Text.Json;
@@ -103,13 +101,13 @@ namespace webApiReact.Controllers
             int god = DateTime.Now.Year;
             int month = DateTime.Now.Month;
             char kvartal = (char)(((month + 2) / 3) + '0');
-
             // Получение текущего пользователя
-            var user = await _userManager.GetUserAsync(User)
-              ?? throw new Exception("Пользователь не найден.");
+            //var user = await _userManager.GetUserAsync(User)
+            //  ?? throw new Exception("Пользователь не найден.");
 
             //Записывай Код предприятия пользователя
-            int kpred = user.K_PRED;
+            // int kpred = user.K_PRED;
+            int kpred = 22222222;
 
             // Проверка, существует ли уже UserReport с заданным годом, kpred и месяцем
             if (UserReportExists(god, kpred, kvartal))
@@ -125,7 +123,7 @@ namespace webApiReact.Controllers
                 GOD = god,
                 K_PRED = kpred,
                 Kvartal = kvartal,
-                User = user,
+                //     User = user,
             };
 
             // Добавление UserReport в контекст и сохранение в базу данных
@@ -153,7 +151,6 @@ namespace webApiReact.Controllers
             {
                 return Problem("Неверно внесены параметры");
             }
-
 
             // Проверка, существует ли уже отчет пользователя для указанных параметров
             if (UserReportExists(god, kpred, kvartal))
@@ -202,7 +199,7 @@ namespace webApiReact.Controllers
             return newReport;
         }
 
-         // Функция Динамического обновления отчёта. Обновляет лишь один или несколько параметров.
+        // Функция Динамического обновления отчёта. Обновляет лишь один или несколько параметров.
         // Принимает в себя параметры для нахождения отчёта, и параметры вида - (Название элемента - значение элемента).
         // Отключенно из-за использование стандартной функции полного обновления отчёта.
         /// PATCH: api/UserReport/change
