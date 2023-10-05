@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 using webApiReact.Models;
 using webApiReact.ViewModels;
 
@@ -49,6 +50,20 @@ namespace webApiReact.Controllers
 
             return user;
         }
+
+        // GET: api/User/info
+        [HttpGet("info")]
+        public async Task<ActionResult<User>> GetInfo()
+        {
+            User user = await _userManager.GetUserAsync(User)
+                ?? throw new Exception("Пользователь не найден.");
+
+            return user is null
+                ? NotFound($"Вы не авторизованы")
+                : user;
+        }
+
+
 
         // PUT: api/User/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
@@ -118,7 +133,6 @@ namespace webApiReact.Controllers
 
 
         // POST: api/User/login
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginViewModel model)
         {
@@ -144,7 +158,6 @@ namespace webApiReact.Controllers
             }
             else
             {
-                // Неудачная аутентификация
                 return BadRequest("Invalid username or password");
             }
         }
