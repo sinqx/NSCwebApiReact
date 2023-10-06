@@ -116,14 +116,14 @@ namespace webApiReact.Controllers
                 // Перенаправление на страницу существующего отчета
             }
 
-
+            var user = await _userManager.FindByNameAsync("test1");
             // Создание нового объекта UserReport
             var userReport = new UserReport
             {
                 GOD = god,
                 K_PRED = kpred,
                 Kvartal = kvartal,
-                //     User = user,
+                User = user,
             };
 
             // Добавление UserReport в контекст и сохранение в базу данных
