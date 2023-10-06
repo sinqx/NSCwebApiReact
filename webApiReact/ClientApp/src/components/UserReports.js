@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "./UserReports.css";
 
 const UserReports = () => {
+  const navigate = useNavigate();
   const [reports, setReports] = useState([]);
 
   useEffect(() => {
@@ -36,18 +37,37 @@ const UserReports = () => {
       return "4";
     }
   };
-
-  
   const currentQuarter = getCurrentQuarter();
+
+
   const createReportForCurrentQuarter = () => {
-    // Обработчик для создания отчета за текущий квартал
-    // ...
+    axios
+    .post("https://localhost:7100/api/UserReport/create", {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+    .then(function (response) {
+      console.log("Report saved successfully");
+      console.log(response.data);
+      // const k_PRED = 22222222;
+      // const god = new Date().getFullYear();
+      // const kvartal =  getCurrentQuarter();
+      // console.log(k_PRED, god, kvartal)
+      // return {
+      //   pathname: `/UserReport/getInfo/${god}/${kvartal}/${k_PRED}`,
+      // };
+      navigate(getUserReportLink(response.data)); // Перенаправляем пользователя на страницу отчета
+    })
+    .catch(function (error) {
+      console.log(error);
+    });
+   
+    
   };
 
   const quarterWords = ["Зима", "Весна", "Лето", "Осень"]; // Соответствие числовых значений кварталам словами
-
   const hasReportForCurrentQuarter = reports.some(
-    
     (report) => report.kvartal === currentQuarter 
   );
 
@@ -62,7 +82,7 @@ const UserReports = () => {
                 className="btn btn-success"
                 onClick={createReportForCurrentQuarter}
               >
-                Создать отчет за {quarterWords[currentQuarter - 1]}
+                Создать отчет за {currentQuarter} квартал. 
               </button>
             </div>
           </div>
@@ -75,7 +95,7 @@ const UserReports = () => {
             >
               <div className="card-body">
                 <h5 className="card-title">
-                  {quarterWords[report.kvartal - 1]} - {report.god}
+                  Картал {report.kvartal} - {report.god}
                 </h5>
                 <p className="card-text">Код предприятия: {report.k_PRED}</p>
                 <Link to={getUserReportLink(report)} className="btn btn-primary">
