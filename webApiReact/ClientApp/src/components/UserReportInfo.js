@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 
@@ -7,6 +7,7 @@ const UserReportInfo = () => {
   const [report, setReport] = useState({});
   const [editedReport, setEditedReport] = useState({});
   const [isFormValid, setIsFormValid] = useState(false);
+  const iframeRef = useRef(null);
 
   useEffect(() => {
     axios
@@ -16,6 +17,13 @@ const UserReportInfo = () => {
       .then(function (response) {
         setReport(response.data);
         setEditedReport(response.data);
+
+        // Проверяем, что iframe загружен и доступен
+        if (iframeRef.current && iframeRef.current.contentWindow) {
+          // Отправляем данные в iframe
+          console.log(response.data)
+          iframeRef.current.contentWindow.postMessage(response.data, "*");
+        }
       })
       .catch(function (error) {
         console.log(error);
@@ -29,14 +37,12 @@ const UserReportInfo = () => {
 
   const handleReportChange = (e) => {
     const { name, value, type, checked } = e.target;
-
     const newValue = type === "checkbox" ? checked : value;
 
     setEditedReport((prevReport) => ({
       ...prevReport,
       [name]: newValue,
     }));
-
     // Проверяем, заполнены ли все поля формы
     const formFields = Object.values({
       ...editedReport,
@@ -48,15 +54,14 @@ const UserReportInfo = () => {
     setIsFormValid(isValid);
   };
 
-
   const handleSaveReport = () => {
     if (!isFormValid) {
       alert("Заполните все поля формы перед сохранением.");
       return;
     }
-    editedReport.god = god
-    editedReport.k_PRED = k_PRED
-    editedReport.kvartal = kvartal
+    editedReport.god = god;
+    editedReport.k_PRED = k_PRED;
+    editedReport.kvartal = kvartal;
     console.log(editedReport);
     axios
       .put("https://localhost:7100/api/UserReport/replace", editedReport, {
@@ -92,50 +97,15 @@ const UserReportInfo = () => {
 
         {/* Отобразить поля отчета для редактирования */}
         <h2>Редактирование отчета</h2>
-        <div>
-          <label>INDGR:</label>
-          <input
-            type="checkbox"
-            name="indgr"
-            checked={editedReport.indgr ?? false}
-            onChange={handleReportChange}
-          />
-        </div>
-        <div>
-          <label>date_UPDATE:</label>
-          <input
-            type="date"
-            name="date_UPDATE"
-            value={
-              (editedReport.date_UPDATE || report.date_UPDATE)?.split("T")[0]
-            }
-            onChange={handleReportChange}
-          />
-        </div>
-        <div>
-          <label>F_I_O:</label>
-          <input
-            type="text"
-            name="f_I_O"
-            value={editedReport.f_I_O ?? ""}
-            onChange={handleReportChange}
-          />
-        </div>
 
-        <div className="form-floating mb-3">
-          <input
-            type="text"
-            name="k_NPO"
-            value={editedReport.k_NPO ?? ""}
-            onChange={handleReportChange}
-            className="form-control"
-            aria-required="true"
-            placeholder="Пусто"
-          />
-          <label>k_NPO</label>
-        </div>
-        {/* Добавьте остальные поля для редактирования */}
-        <iframe src="/ReportInfoPDFformat.html" width="100%" height="800px" title="Report Info"></iframe>
+        <iframe
+          src={`/ReportInfoRus.html?report=${encodeURIComponent(
+            JSON.stringify(report)
+          )}`}
+          width="1150px"
+          height="810px"
+          title="Report Info"
+        ></iframe>
         {/* Кнопка сохранения отчета */}
         <button onClick={handleSaveReport}>Сохранить</button>
         <button onClick={handleEraseReport}>Очистить</button>
