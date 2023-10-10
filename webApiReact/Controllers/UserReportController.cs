@@ -84,7 +84,7 @@ namespace webApiReact.Controllers
             // Поиск отчёта по году, КПРЭД и месяцу
             var userReport = await _context.UsersReports.SingleOrDefaultAsync(
                report => report.GOD == god && report.K_PRED == kpred
-               && report.Kvartal == kvartal);
+               && report.Kvaratl == kvartal);
 
             // Если отчёт не найден, создание нового отчёта, иначе выдача нужного Отчёта
             return userReport is null
@@ -122,7 +122,7 @@ namespace webApiReact.Controllers
             {
                 GOD = god,
                 K_PRED = kpred,
-                Kvartal = kvartal,
+                Kvaratl = kvartal,
                 User = user,
             };
 
@@ -163,7 +163,7 @@ namespace webApiReact.Controllers
             {
                 GOD = god,
                 K_PRED = kpred,
-                Kvartal = kvartal,
+                Kvaratl = kvartal,
                 User = user,
             };
 
@@ -184,7 +184,7 @@ namespace webApiReact.Controllers
 
             var existingReport = await _context.UsersReports.SingleOrDefaultAsync(
                 report => report.GOD == newReport.GOD && report.K_PRED == newReport.K_PRED
-                && report.Kvartal == newReport.Kvartal);
+                && report.Kvaratl == newReport.Kvaratl);
 
             if (existingReport == null)
             {
@@ -209,7 +209,7 @@ namespace webApiReact.Controllers
         //   // var user = await _userManager.GetUserAsync(User) ?? throw new Exception("Пользователь не найден.");
 
         //    var userReport = await _context.UsersReports.SingleOrDefaultAsync(report =>
-        //        report.GOD == god && report.K_PRED == k_pred && report.Kvartal == kvartal);
+        //        report.GOD == god && report.K_PRED == k_pred && report.Kvaratl == kvartal);
 
         //    if (userReport == null)
         //    {
@@ -282,7 +282,7 @@ namespace webApiReact.Controllers
             // Ищем отчёт пользователя по указанным значениям 
             var userReport = await _context.UsersReports.SingleOrDefaultAsync(
                 report => report.GOD == god && report.K_PRED == kpred
-                && report.Kvartal == kvartal && report.User.Id == user.Id);
+                && report.Kvaratl == kvartal && report.User.Id == user.Id);
 
             // Если отчёт не найден, возвращаем ошибку NotFound с сообщением.
             if (userReport == null)
@@ -302,7 +302,7 @@ namespace webApiReact.Controllers
         private bool UserReportExists(int god, int kpred, char kvartal)
         {
             return _context.UsersReports?.Any(e => e.GOD == god
-            && e.K_PRED == kpred && e.Kvartal == kvartal) ?? false;
+            && e.K_PRED == kpred && e.Kvaratl == kvartal) ?? false;
         }
 
         //Проверка на нужное количество цифр в параметрах
