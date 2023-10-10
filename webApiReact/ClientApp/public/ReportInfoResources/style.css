@@ -1,3 +1,12 @@
+.editable-field {
+    background-color: #d2d2d2;
+    border: 12px solid #020202;
+    padding: 140px 555px;
+	display: inline-block;
+    width: 50px; /* Установите желаемую ширину поля */
+    text-align: center; /* Чтобы число было по центру */
+  }
+
 sup {
 	vertical-align: baseline;
 	position: relative;
