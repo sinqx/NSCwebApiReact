@@ -232,7 +232,7 @@ namespace webApiReact.Migrations
                     b.Property<string>("GOD")
                         .HasColumnType("char(4)");
 
-                    b.Property<string>("Kvartal")
+                    b.Property<string>("Kvaratl")
                         .HasColumnType("char(1)");
 
                     b.Property<string>("K_PRED")
@@ -268,6 +268,9 @@ namespace webApiReact.Migrations
                     b.Property<long?>("P1")
                         .HasColumnType("bigint");
 
+                    b.Property<long?>("P2")
+                        .HasColumnType("bigint");
+
                     b.Property<int?>("RENAME")
                         .HasColumnType("int");
 
@@ -284,7 +287,6 @@ namespace webApiReact.Migrations
                         .HasColumnType("bigint");
 
                     b.Property<string>("UserId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("adress")
@@ -314,13 +316,19 @@ namespace webApiReact.Migrations
                     b.Property<long?>("p7")
                         .HasColumnType("bigint");
 
+                    b.Property<long?>("p8")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("p9")
+                        .HasColumnType("bigint");
+
                     b.Property<string>("user_INSERT")
                         .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("user_REVIEW")
                         .HasColumnType("varchar(50)");
 
-                    b.HasKey("GOD", "Kvartal", "K_PRED");
+                    b.HasKey("GOD", "Kvaratl", "K_PRED");
 
                     b.HasIndex("UserId");
 
@@ -382,9 +390,7 @@ namespace webApiReact.Migrations
                 {
                     b.HasOne("webApiReact.Models.User", "User")
                         .WithMany("UserReports")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UserId");
 
                     b.Navigation("User");
                 });

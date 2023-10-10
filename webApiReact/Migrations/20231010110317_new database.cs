@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace webApiReact.Migrations
 {
     /// <inheritdoc />
-    public partial class initialcreation : Migration
+    public partial class newdatabase : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -162,7 +162,7 @@ namespace webApiReact.Migrations
                 columns: table => new
                 {
                     GOD = table.Column<string>(type: "char(4)", nullable: false),
-                    Kvartal = table.Column<string>(type: "char(1)", nullable: false),
+                    Kvaratl = table.Column<string>(type: "char(1)", nullable: false),
                     K_PRED = table.Column<string>(type: "char(8)", nullable: false),
                     INDGR = table.Column<bool>(type: "bit", nullable: true),
                     E001 = table.Column<bool>(type: "bit", nullable: true),
@@ -181,26 +181,28 @@ namespace webApiReact.Migrations
                     K_NPO = table.Column<long>(type: "bigint", nullable: true),
                     TIP2 = table.Column<int>(type: "int", nullable: true),
                     TIP3 = table.Column<int>(type: "int", nullable: true),
+                    P1 = table.Column<long>(type: "bigint", nullable: true),
+                    P2 = table.Column<long>(type: "bigint", nullable: true),
                     p3 = table.Column<long>(type: "bigint", nullable: true),
                     p4 = table.Column<long>(type: "bigint", nullable: true),
                     p5 = table.Column<long>(type: "bigint", nullable: true),
                     p6 = table.Column<long>(type: "bigint", nullable: true),
                     p7 = table.Column<long>(type: "bigint", nullable: true),
+                    p8 = table.Column<long>(type: "bigint", nullable: true),
+                    p9 = table.Column<long>(type: "bigint", nullable: true),
                     p10 = table.Column<long>(type: "bigint", nullable: true),
-                    P1 = table.Column<long>(type: "bigint", nullable: true),
                     E002 = table.Column<bool>(type: "bit", nullable: true),
                     E003 = table.Column<bool>(type: "bit", nullable: true),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UsersReports", x => new { x.GOD, x.Kvartal, x.K_PRED });
+                    table.PrimaryKey("PK_UsersReports", x => new { x.GOD, x.Kvaratl, x.K_PRED });
                     table.ForeignKey(
                         name: "FK_UsersReports_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateIndex(
