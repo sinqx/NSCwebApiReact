@@ -13,7 +13,7 @@ namespace webApiReact.Models
 
         [Required]
         [Column(TypeName = "char(1)")]
-        public char Kvartal { get; set; }
+        public char Kvaratl { get; set; }
 
         [Required]
         [Column(TypeName = "char(8)")]
@@ -65,6 +65,13 @@ namespace webApiReact.Models
 
         public int? TIP3 { get; set; }
 
+
+        [Column(TypeName = "bigint")]
+        public int? P1 { get; set; }
+
+        [Column(TypeName = "bigint")]
+        public int? P2 { get; set; }
+
         [Column(TypeName = "bigint")]
         public int? p3 { get; set; }
 
@@ -81,10 +88,13 @@ namespace webApiReact.Models
         public int? p7 { get; set; }
 
         [Column(TypeName = "bigint")]
-        public int? p10 { get; set; }
+        public int? p8 { get; set; }
 
         [Column(TypeName = "bigint")]
-        public int? P1 { get; set; }
+        public int? p9 { get; set; }
+
+        [Column(TypeName = "bigint")]
+        public int? p10 { get; set; }
 
         [Column(TypeName = "bit")]
         public bool? E002 { get; set; }
