@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 using webApiReact.Models;
 using System.Text.Json;
 using System;
+using webApiReact.ViewModels;
 
 namespace webApiReact.Controllers
 {
@@ -60,14 +61,14 @@ namespace webApiReact.Controllers
         }
 
 
-        /// GET by god and kvartal: api/UserReport/getInfo
+        /// GET by god and kvaratl: api/UserReport/getInfo
         // Получение отчёта по году и кварталу
         [HttpGet("getInfo")]
-        public async Task<ActionResult<UserReport>> GetUserReportByYearKvartal(int god, int kpred, char kvartal)
+        public async Task<ActionResult<UserReport>> GetUserReportByYearKvartal(int god, int kpred, char kvaratl)
         {
 
             // Проверка валидности переданных параметров
-            if (!ValidateParameters(god, kpred, kvartal))
+            if (!ValidateParameters(god, kpred, kvaratl))
             {
                 return Problem("Неверно внесены параметры.");
             }
@@ -84,11 +85,11 @@ namespace webApiReact.Controllers
             // Поиск отчёта по году, КПРЭД и месяцу
             var userReport = await _context.UsersReports.SingleOrDefaultAsync(
                report => report.GOD == god && report.K_PRED == kpred
-               && report.Kvaratl == kvartal);
+               && report.Kvaratl == kvaratl);
 
             // Если отчёт не найден, создание нового отчёта, иначе выдача нужного Отчёта
             return userReport is null
-                ? await CreateByYearKvartalUserReport(god, kvartal)
+                ? await CreateByYearKvartalUserReport(god, kvaratl)
                 : userReport;
         }
 
@@ -199,32 +200,55 @@ namespace webApiReact.Controllers
             return newReport;
         }
 
+        //[HttpPut("change")]
+        //public async Task<ActionResult<UserReport>> ChangeUserReport(ReportAnswers answers, int god, int kpred, char kvaratl)
+        //{
+        //    //var user = await _userManager.GetUserAsync(User)
+        //    //    ?? throw new Exception("Пользователь не найден.");
+
+        //    var existingReport = await _context.UsersReports.SingleOrDefaultAsync(
+        //        report => report.GOD == newReport.GOD && report.K_PRED == newReport.K_PRED
+        //        && report.Kvaratl == newReport.Kvaratl);
+
+        //    if (existingReport == null)
+        //    {
+        //        return NotFound("Такого отчета не существует");
+        //    }
+        //    newReport.User = existingReport.User;
+
+        //    // Заменяем существующий отчёт новым отчётом
+        //    _context.Entry(existingReport).CurrentValues.SetValues(newReport);
+        //    await _context.SaveChangesAsync();
+
+        //    return newReport;
+        //}
+
         // Функция Динамического обновления отчёта. Обновляет лишь один или несколько параметров.
         // Принимает в себя параметры для нахождения отчёта, и параметры вида - (Название элемента - значение элемента).
         // Отключенно из-за использование стандартной функции полного обновления отчёта.
         /// PATCH: api/UserReport/change
         //    [HttpPatch("change")]
-        //    public async Task<ActionResult<UserReport>> UpdateUserReport(int god, int k_pred, char kvartal, IDictionary<string, object> parameters)
+        //    public async Task<ActionResult<UserReport>> UpdateUserReport(int god, int k_pred, char kvaratl, IDictionary<string, object> parameters)
         //    {
         //   // var user = await _userManager.GetUserAsync(User) ?? throw new Exception("Пользователь не найден.");
 
         //    var userReport = await _context.UsersReports.SingleOrDefaultAsync(report =>
-        //        report.GOD == god && report.K_PRED == k_pred && report.Kvaratl == kvartal);
+        //        report.GOD == god && report.K_PRED == k_pred && report.Kvaratl == kvaratl);
 
         //    if (userReport == null)
         //    {
-        //        return NotFound($"Такого отчета не существует: Год-{god}, квартал-{kvartal}, код предприятия-{k_pred}");
+        //        return NotFound($"Такого отчета не существует: Год-{god}, квартал-{kvaratl}, код предприятия-{k_pred}");
         //    }
 
         //    foreach (var parameter in parameters)
         //    {
         //        var lowercaseParameterName = parameter.Key.ToLower();
-        //        if (lowercaseParameterName != "god" && lowercaseParameterName != "kvartal" && lowercaseParameterName != "k_pred")
+        //        if (lowercaseParameterName != "god" && lowercaseParameterName != "kvaratl" && lowercaseParameterName != "k_pred")
         //        {
         //            var property = userReport.GetType().GetProperty(lowercaseParameterName);
         //            if (property != null && property.CanWrite
         //                && property.Name.ToLower() != "god"
-        //                && property.Name.ToLower() != "kvartal"
+        //                && property.Name.ToLower() != "kvaratl"
         //                && property.Name.ToLower() != "k_pred")
         //            {
         //                switch (property.PropertyType)
@@ -261,7 +285,7 @@ namespace webApiReact.Controllers
         //}
 
 
-        // DELETE: api/UserReport/delete/{god}/{kpred}/{kvartal}
+        // DELETE: api/UserReport/delete/{god}/{kpred}/{kvaratl}
         // Удаление отчёта пользователя по указанным значениям
 
 

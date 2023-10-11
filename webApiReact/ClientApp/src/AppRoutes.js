@@ -23,7 +23,7 @@ const AppRoutes = [
         element: <Registration />
     },
     {
-        path: '/UserReport/getInfo/:god/:kvartal/:k_PRED',
+        path: '/UserReport/getInfo/:god/:kvaratl/:k_PRED',
         element: <UserReportInfo />
     }
     
