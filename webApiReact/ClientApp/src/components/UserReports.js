@@ -6,6 +6,9 @@ import "./UserReports.css";
 const UserReports = () => {
   const navigate = useNavigate();
   const [reports, setReports] = useState([]);
+  const [searchGod, setSearchGod] = useState("");
+  const [searchKvaratl, setSearchKvaratl] = useState("");
+  const [searchK_NPO, setSearchK_NPO] = useState("");
 
   useEffect(() => {
     axios
@@ -19,9 +22,9 @@ const UserReports = () => {
   }, []);
 
   const getUserReportLink = (report) => {
-    const { god, kvartal, k_PRED } = report;
+    const { god, kvaratl, k_PRED } = report;
     return {
-      pathname: `/UserReport/getInfo/${god}/${kvartal}/${k_PRED}`,
+      pathname: `/UserReport/getInfo/${god}/${kvaratl}/${k_PRED}`,
     };
   };
 
@@ -37,43 +40,48 @@ const UserReports = () => {
       return "4";
     }
   };
-  const currentQuarter = getCurrentQuarter();
 
+  const currentQuarter = getCurrentQuarter();
 
   const createReportForCurrentQuarter = () => {
     axios
-    .post("https://localhost:7100/api/UserReport/create", {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
-    .then(function (response) {
-      console.log("Report saved successfully");
-      console.log(response.data);
-      // const k_PRED = 22222222;
-      // const god = new Date().getFullYear();
-      // const kvartal =  getCurrentQuarter();
-      // console.log(k_PRED, god, kvartal)
-      // return {
-      //   pathname: `/UserReport/getInfo/${god}/${kvartal}/${k_PRED}`,
-      // };
-      navigate(getUserReportLink(response.data)); // Перенаправляем пользователя на страницу отчета
-    })
-    .catch(function (error) {
-      console.log(error);
-    });
-   
-    
+      .post("https://localhost:7100/api/UserReport/create", {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+      .then(function (response) {
+        console.log("Report saved successfully");
+        console.log(response.data);
+        navigate(getUserReportLink(response.data)); // Перенаправляем пользователя на страницу отчета
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
   };
 
-  const quarterWords = ["Зима", "Весна", "Лето", "Осень"]; // Соответствие числовых значений кварталам словами
   const hasReportForCurrentQuarter = reports.some(
-    (report) => report.kvartal === currentQuarter 
+    (report) => report.kvaratl === currentQuarter
   );
+
+  // Функция для фильтрации отчетов по году, кварталу и коду предприятия
+  const filterReports = () => {
+    const filteredReports = reports.filter((report) => {
+      if (
+        (searchGod && report.god !== searchGod) ||
+        (searchKvaratl && report.kvaratl !== searchKvaratl) ||
+        (searchK_NPO && report.k_PRED !== searchK_NPO)
+      ) {
+        return false;
+      }
+      return true;
+    });
+    return filteredReports;
+  };
 
   return (
     <div>
-      <h1>Отчеты</h1>
+      <h1>Отчеты: </h1>
       <div className="content_container">
         {!hasReportForCurrentQuarter && (
           <div className="card mb-3">
@@ -82,20 +90,20 @@ const UserReports = () => {
                 className="btn btn-success"
                 onClick={createReportForCurrentQuarter}
               >
-                Создать отчет за {currentQuarter} квартал. 
+                Создать отчет за {currentQuarter} квартал.
               </button>
             </div>
           </div>
         )}
         {reports.length > 0 ? (
-          reports.map((report) => (
+          filterReports().map((report) => (
             <div
               className="card mb-3"
-              key={`${report.god}_${report.kvartal}_${report.k_PRED}`}
+              key={`${report.god}_${report.kvaratl}_${report.k_PRED}`}
             >
               <div className="card-body">
                 <h5 className="card-title">
-                  Картал {report.kvartal} - {report.god}
+                  Картал {report.kvaratl} - {report.god}
                 </h5>
                 <p className="card-text">Код предприятия: {report.k_PRED}</p>
                 <Link to={getUserReportLink(report)} className="btn btn-primary">

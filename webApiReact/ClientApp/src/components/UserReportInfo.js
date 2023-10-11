@@ -4,15 +4,17 @@ import { useParams } from "react-router-dom";
 import "./UserReportInfo.css";
 
 const UserReportInfo = () => {
-  const { god, kvartal, k_PRED } = useParams();
+  const { god, kvaratl, k_PRED } = useParams();
   const [report, setReport] = useState({});
   const [editedReport, setEditedReport] = useState({});
-  const [isFormValid, setIsFormValid] = useState(false);
+  const [searchGod, setSearchGod] = useState("");
+  const [searchKvaratl, setSearchKvaratl] = useState("");
+  const [searchK_PRED, setSearchK_PRED] = useState("");
 
-  useEffect(() => {
+  const handleSearch = () => {
     axios
       .get(
-        `https://localhost:7100/api/UserReport/getInfo?god=${god}&kpred=${k_PRED}&kvartal=${kvartal}`
+        `https://localhost:7100/api/UserReport/getInfo?god=${searchGod}&kpred=${searchK_PRED}&kvaratl=${searchKvaratl}`
       )
       .then(function (response) {
         setReport(response.data);
@@ -21,43 +23,36 @@ const UserReportInfo = () => {
       .catch(function (error) {
         console.log(error);
       });
-  }, [god, k_PRED, kvartal]);
-
-  const handleEraseReport = () => {
-    setEditedReport({});
-    setIsFormValid(false);
   };
 
-  const handleIframeLoad = (event) => {
-    const iframe = event.target;
-    const iframeWindow = iframe.contentWindow;
-    iframeWindow.handleUpdateReport = handleUpdateReport;
+  useEffect(() => {
+    handleSearch();
+  }, []);
+
+  const handleResetReport = () => {
+    setEditedReport(report);
   };
 
   const handleUpdateReport = (updatedReport) => {
     const { name, value, type, checked } = updatedReport.target;
     const newValue = type === "checkbox" ? checked : value;
+    // Проверка на ввод знака минус и символа "e"
+    if (
+      type === "number" &&
+      (updatedReport.key === "-" || updatedReport.key === "e")
+    ) {
+      updatedReport.preventDefault();
+      return;
+    }
+    const sanitizedValue = value === "" ? null : newValue;
 
     setEditedReport((prevReport) => ({
       ...prevReport,
-      [name]: newValue,
+      [name]: sanitizedValue,
     }));
-    // Проверяем, заполнены ли все поля формы
-    const formFields = Object.values({
-      ...editedReport,
-      [name]: newValue,
-    });
-    const isValid = formFields.every(
-      (field) => field !== "" && field !== undefined
-    );
-    setIsFormValid(isValid);
   };
 
   const handleSaveReport = () => {
-    editedReport.god = god;
-    editedReport.k_PRED = k_PRED;
-    editedReport.kvartal = kvartal;
-    console.log(editedReport);
     axios
       .put("https://localhost:7100/api/UserReport/replace", editedReport, {
         headers: {
@@ -76,45 +71,65 @@ const UserReportInfo = () => {
   return (
     <div>
       <h1>Национальный Статистический Комитет</h1>
-      <div className="content_container">
-        <div className="row">
+      <div className="content_container mb-4">
+        <div className="row ">
           <div className="col-md-4">
             <div className="card mb-3">
               <div className="card-body">
                 <h5 className="card-title">
-                  Дата: {report.god}, квартал #{report.kvartal}
+                  Дата:{" "}
+                  <input
+                    type="text"
+                    placeholder="2023"
+                    value={searchGod}
+                    onChange={(e) => setSearchGod(e.target.value)}
+                  />
+                  Номер квартала{" "}
+                  <input
+                    type="text"
+                    placeholder="__   "
+                    value={searchKvaratl}
+                    onChange={(e) => setSearchKvaratl(e.target.value)}
+                  />
                 </h5>
-                <p className="card-text">Код предприятия: {report.k_PRED}</p>
+                <p className="card-text">
+                  Код предприятия:{" "}
+                  <input
+                    type="text"
+                    placeholder="00000000"
+                    value={searchK_PRED}
+                    onChange={(e) => setSearchK_PRED(e.target.value)}
+                  />
+                </p>
               </div>
+              <button className="btn btn-primary" onClick={handleSearch}>
+                Найти
+              </button>
             </div>
           </div>
         </div>
 
         {/* Отобразить поля отчета для редактирования */}
         <h2>Редактирование отчета</h2>
-        {/* <iframe
-          src={`/ReportInfoRus.html?report=${encodeURIComponent(
-            JSON.stringify(report)
-          )}`}
-          width="1150px"
-          height="810px"
-          title="Report Info"
-          sandbox="allow-scripts"
-          onLoad={handleIframeLoad}
-        ></iframe> */}
-        <table class="iksweb">
+        <table className="iksweb mb-4">
           <tbody>
             <tr>
               <td>Наименование показателя </td>
               <td>Код строки </td>
               <td>Единицы измерения</td>
-              <td>Количество </td>
+              <td>
+                {report.tiP2 === 1
+                  ? "Базар/рынок"
+                  : report.tiP2 === 2
+                  ? "Торговый центр"
+                  : "Место"}{" "}
+              </td>
             </tr>
             <tr>
               <td>A</td>
               <td>Б</td>
               <td>В</td>
-              <td>P0</td>
+              <td>{report.tiP2}</td>
             </tr>
             <tr>
               <td>
@@ -129,7 +144,6 @@ const UserReportInfo = () => {
                   name="p1"
                   value={editedReport.p1}
                   onChange={handleUpdateReport}
-                  pattern="[0-9]*"
                 />
               </td>
             </tr>
@@ -143,7 +157,6 @@ const UserReportInfo = () => {
                   name="p2"
                   value={editedReport.p2}
                   onChange={handleUpdateReport}
-                  pattern="[0-9]*"
                 />
               </td>
             </tr>
@@ -157,7 +170,6 @@ const UserReportInfo = () => {
                   name="p3"
                   value={editedReport.p3}
                   onChange={handleUpdateReport}
-                  pattern="[0-9]*"
                 />
               </td>
             </tr>
@@ -173,7 +185,6 @@ const UserReportInfo = () => {
                   name="p4"
                   value={editedReport.p4}
                   onChange={handleUpdateReport}
-                  pattern="[0-9]*"
                 />
               </td>
             </tr>
@@ -187,7 +198,6 @@ const UserReportInfo = () => {
                   name="p5"
                   value={editedReport.p5}
                   onChange={handleUpdateReport}
-                  pattern="[0-9]*"
                 />
               </td>
             </tr>
@@ -201,7 +211,6 @@ const UserReportInfo = () => {
                   name="p6"
                   value={editedReport.p6}
                   onChange={handleUpdateReport}
-                  pattern="[0-9]*"
                 />
               </td>
             </tr>
@@ -211,29 +220,37 @@ const UserReportInfo = () => {
                 предпринимателей
               </td>
               <td>07</td>
-              <td> м²</td>
+              <td>м²</td>
               <td>
-                <input
-                  type="number"
-                  name="p7"
-                  value={editedReport.p7}
-                  onChange={handleUpdateReport}
-                  pattern="[0-9]*"
-                />
+                {report.tiP2 === 1 ? (
+                  "Х"
+                ) : (
+                  <input
+                    type="number"
+                    name="p7"
+                    value={editedReport.p7}
+                    onChange={handleUpdateReport}
+                    readOnly={report.tiP2 === 1}
+                  />
+                )}
               </td>
             </tr>
             <tr>
-              <td>Средняя стоимость 1 места в день </td>
+              <td>Средняя стоимость 1 места в день</td>
               <td>08</td>
-              <td>сомов </td>
+              <td>сомов</td>
               <td>
-                <input
-                  type="number"
-                  name="p8"
-                  value={editedReport.p8}
-                  onChange={handleUpdateReport}
-                  pattern="[0-9]*"
-                />
+                {report.tiP2 === 2 ? (
+                  "Х"
+                ) : (
+                  <input
+                    type="number"
+                    name="p8"
+                    value={editedReport.p8}
+                    onChange={handleUpdateReport}
+                    readOnly={report.tiP2 === 2}
+                  />
+                )}
               </td>
             </tr>
             <tr>
@@ -243,13 +260,17 @@ const UserReportInfo = () => {
               <td>09</td>
               <td>тыс.сомов</td>
               <td>
-                <input
-                  type="number"
-                  name="p9"
-                  value={editedReport.p9}
-                  onChange={handleUpdateReport}
-                  pattern="[0-9]*"
-                />
+                {report.tiP2 === 2 ? (
+                  "Х"
+                ) : (
+                  <input
+                    type="number"
+                    name="p9"
+                    value={editedReport.p9}
+                    onChange={handleUpdateReport}
+                    readOnly={report.tiP2 === 2}
+                  />
+                )}
               </td>
             </tr>
             <tr>
@@ -262,15 +283,26 @@ const UserReportInfo = () => {
                   name="p10"
                   value={editedReport.p10}
                   onChange={handleUpdateReport}
-                  inputMode ="numeric"
                 />
               </td>
             </tr>
           </tbody>
         </table>
         {/* Кнопка сохранения отчета */}
-        <button onClick={handleSaveReport}>Сохранить</button>
-        <button onClick={handleEraseReport}>Очистить</button>
+        <div className="buttons-container">
+          <button
+            className="btn btn-save"
+            onClick={handleSaveReport}
+          >
+            Сохранить
+          </button>
+          <button
+            className="btn btn-reset"
+            onClick={handleResetReport}
+          >
+            Сбросить
+          </button>
+        </div>
       </div>
     </div>
   );
