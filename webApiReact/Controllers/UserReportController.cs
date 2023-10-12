@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore;
 using System.Text.RegularExpressions;
 using webApiReact.Models;
 using System.Text.Json;
-using System;
 using webApiReact.ViewModels;
 
 namespace webApiReact.Controllers
@@ -88,9 +87,10 @@ namespace webApiReact.Controllers
                && report.Kvaratl == kvaratl);
 
             // Если отчёт не найден, создание нового отчёта, иначе выдача нужного Отчёта
-            return userReport is null
-                ? await CreateByYearKvartalUserReport(god, kvaratl)
-                : userReport;
+            return userReport == null && god == DateTime.Now.Year
+                 ? await CreateByYearKvartalUserReport(god, kvaratl)
+                 : userReport ?? throw new ApplicationException(userReport == null 
+                 ? "Ошибка нахождения отчёта" : "Такого отчёта не существует");
         }
 
         /// POST by kpred : api/UserReport/create
@@ -143,7 +143,7 @@ namespace webApiReact.Controllers
         {
             // Получение текущего пользователя
             var user = await _userManager.GetUserAsync(User)
-               ?? throw new Exception("Пользователь не найден.");
+               ?? throw new ApplicationException("Пользователь не найден.");
 
             int kpred = user.K_PRED;
 
@@ -200,28 +200,48 @@ namespace webApiReact.Controllers
             return newReport;
         }
 
-        //[HttpPut("change")]
-        //public async Task<ActionResult<UserReport>> ChangeUserReport(ReportAnswers answers, int god, int kpred, char kvaratl)
-        //{
-        //    //var user = await _userManager.GetUserAsync(User)
-        //    //    ?? throw new Exception("Пользователь не найден.");
+        /// PUT: api/UserReport/change
+        //  Обновление вопросов отчёта пользователя
+        [HttpPut("change")]
+        public async Task<ActionResult<UserReport>> ChangeUserReport(ReportAnswersModel answers)
+        {
+            //var user = await _userManager.GetUserAsync(User)
+            //    ?? throw new Exception("Пользователь не найден.");
+            if (answers == null)
+            {
+                return Problem("Ответы пусты, отчёт не обновлён");
+            }
 
-        //    var existingReport = await _context.UsersReports.SingleOrDefaultAsync(
-        //        report => report.GOD == newReport.GOD && report.K_PRED == newReport.K_PRED
-        //        && report.Kvaratl == newReport.Kvaratl);
+            var existingReport = await _context.UsersReports.SingleOrDefaultAsync(
+                report => report.GOD == answers.GOD && report.K_PRED == answers.K_PRED
+                && report.Kvaratl == answers.Kvaratl);
 
-        //    if (existingReport == null)
-        //    {
-        //        return NotFound("Такого отчета не существует");
-        //    }
-        //    newReport.User = existingReport.User;
+            if (existingReport == null)
+            {
+                return NotFound("Такого отчета не существует");
+            }
 
-        //    // Заменяем существующий отчёт новым отчётом
-        //    _context.Entry(existingReport).CurrentValues.SetValues(newReport);
-        //    await _context.SaveChangesAsync();
+            // Получаем свойства p1 до p10 из объекта answers
+            var answerProperties = answers.GetType().GetProperties()
+                .Where(p => p.Name.StartsWith("p", StringComparison.OrdinalIgnoreCase)
+                && char.IsDigit(p.Name[1])).ToList();
 
-        //    return newReport;
-        //}
+            // Обновляем соответствующие свойства в объекте existingReport
+            foreach (var answerProperty in answerProperties)
+            {
+                var existingReportProperty = existingReport.GetType().GetProperty(answerProperty.Name);
+
+                if (existingReportProperty != null && existingReportProperty.CanWrite)
+                {
+                    var value = answerProperty.GetValue(answers);
+                    existingReportProperty.SetValue(existingReport, value);
+                }
+            }
+
+            await _context.SaveChangesAsync();
+
+            return existingReport;
+        }
 
         // Функция Динамического обновления отчёта. Обновляет лишь один или несколько параметров.
         // Принимает в себя параметры для нахождения отчёта, и параметры вида - (Название элемента - значение элемента).
@@ -323,18 +343,18 @@ namespace webApiReact.Controllers
         }
 
         //Проверка, существует ли отчёт с такими параметрами
-        private bool UserReportExists(int god, int kpred, char kvartal)
+        private bool UserReportExists(int god, int kpred, char kvaratl)
         {
             return _context.UsersReports?.Any(e => e.GOD == god
-            && e.K_PRED == kpred && e.Kvaratl == kvartal) ?? false;
+            && e.K_PRED == kpred && e.Kvaratl == kvaratl) ?? false;
         }
 
         //Проверка на нужное количество цифр в параметрах
-        private static bool ValidateParameters(int god, int kpred, char kvartal)
+        private static bool ValidateParameters(int god, int kpred, char kvaratl)
         {
-            bool isGodValid = Regex.IsMatch(god.ToString(), @"^\d{4}$");
+            bool isGodValid = Regex.IsMatch(god.ToString(), @"^\d{4}$") && god > 2000 && god <= DateTime.Now.Year;
             bool isKpredValid = Regex.IsMatch(kpred.ToString(), @"^\d{8}$");
-            bool isKvartalhValid = Regex.IsMatch(kvartal.ToString(), @"^\d{1}$");
+            bool isKvartalhValid = Regex.IsMatch(kvaratl.ToString(), @"^\d{1}$") && kvaratl > 48 && kvaratl < 61;
 
             return isGodValid && isKpredValid && isKvartalhValid;
         }
