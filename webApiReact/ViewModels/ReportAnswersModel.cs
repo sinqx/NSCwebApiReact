@@ -2,8 +2,13 @@
 
 namespace webApiReact.ViewModels
 {
-    public class ReportAnswers
+    public class ReportAnswersModel
     {
+        public required int GOD { get; set; }
+
+        public required char Kvaratl { get; set; }
+
+        public required int K_PRED { get; set; }
         public int? P1 { get; set; }
         public int? P2 { get; set; }
         public int? p3 { get; set; }
