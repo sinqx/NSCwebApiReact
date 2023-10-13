@@ -4,11 +4,12 @@ import { useParams } from "react-router-dom";
 import "./UserReportInfo.css";
 
 const UserReportInfo = () => {
+  const currentYear = new Date().getFullYear();
   const [error, setError] = useState(null);
   const [report, setReport] = useState({});
   const [answers, setAnswers] = useState({});
   const { god, kvaratl, k_PRED } = useParams();
-  const [searchGod, setSearchGod] = useState("");
+  const [searchGod, setSearchGod] = useState(currentYear.toString());
   const [searchK_PRED, setSearchK_PRED] = useState("");
   const [searchKvaratl, setSearchKvaratl] = useState("");
   const [searchResult, setSearchResult] = useState(false);
@@ -101,14 +102,14 @@ const UserReportInfo = () => {
                   Дата:{" "}
                   <input
                     type="text"
-                    placeholder="2023"
+                    placeholder="____"
                     value={searchGod}
                     onChange={(e) => setSearchGod(e.target.value)}
                   />
                   Номер квартала{" "}
                   <input
                     type="text"
-                    placeholder="__   "
+                    placeholder="__"
                     value={searchKvaratl}
                     onChange={(e) => setSearchKvaratl(e.target.value)}
                   />
