@@ -12,6 +12,7 @@ namespace webApiReact.Models
 
         public override DbSet<User> Users { get; set; }
         public DbSet<UserReport> UsersReports { get; set; }
+        public DbSet<Company> Companies { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
