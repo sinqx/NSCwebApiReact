@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace webApiReact.Migrations
 {
     /// <inheritdoc />
-    public partial class newdatabase : Migration
+    public partial class newstart : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -49,6 +49,40 @@ namespace webApiReact.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetUsers", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Companies",
+                columns: table => new
+                {
+                    K_PRED = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    NAME = table.Column<string>(type: "nvarchar(150)", nullable: true),
+                    T_ZN = table.Column<string>(type: "nvarchar(150)", nullable: true),
+                    K_NPU = table.Column<long>(type: "bigint", nullable: true),
+                    adress = table.Column<string>(type: "nvarchar(150)", nullable: true),
+                    FSOB = table.Column<long>(type: "bigint", nullable: true),
+                    KTPP = table.Column<long>(type: "bigint", nullable: true),
+                    KTP = table.Column<long>(type: "bigint", nullable: true),
+                    KTP1 = table.Column<long>(type: "bigint", nullable: true),
+                    KTP2 = table.Column<long>(type: "bigint", nullable: true),
+                    KTP3 = table.Column<long>(type: "bigint", nullable: true),
+                    OKD_3 = table.Column<string>(type: "varchar(10)", nullable: false),
+                    F_I_O = table.Column<string>(type: "nvarchar(150)", nullable: true),
+                    T_ON = table.Column<long>(type: "bigint", nullable: true),
+                    TIP1 = table.Column<long>(type: "bigint", nullable: true),
+                    TIP2 = table.Column<long>(type: "bigint", nullable: true),
+                    TIP3 = table.Column<long>(type: "bigint", nullable: true),
+                    GR = table.Column<long>(type: "bigint", nullable: true),
+                    STATUS1 = table.Column<string>(type: "nvarchar(150)", nullable: true),
+                    STATUS2 = table.Column<string>(type: "nvarchar(150)", nullable: true),
+                    STATUS3 = table.Column<string>(type: "nvarchar(150)", nullable: true),
+                    STATUS4 = table.Column<string>(type: "nvarchar(150)", nullable: true),
+                    Expr1 = table.Column<string>(type: "nvarchar(262)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Companies", x => x.K_PRED);
                 });
 
             migrationBuilder.CreateTable(
@@ -267,6 +301,9 @@ namespace webApiReact.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetUserTokens");
+
+            migrationBuilder.DropTable(
+                name: "Companies");
 
             migrationBuilder.DropTable(
                 name: "UsersReports");

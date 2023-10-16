@@ -155,6 +155,86 @@ namespace webApiReact.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("webApiReact.Models.Company", b =>
+                {
+                    b.Property<long>("K_PRED")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("K_PRED"));
+
+                    b.Property<string>("Expr1")
+                        .HasColumnType("nvarchar(262)");
+
+                    b.Property<long?>("FSOB")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("F_I_O")
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<long?>("GR")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("KTP")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("KTP1")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("KTP2")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("KTP3")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("KTPP")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("K_NPU")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("NAME")
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<string>("OKD_3")
+                        .IsRequired()
+                        .HasColumnType("varchar(10)");
+
+                    b.Property<string>("STATUS1")
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<string>("STATUS2")
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<string>("STATUS3")
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<string>("STATUS4")
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<long?>("TIP1")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("TIP2")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("TIP3")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("T_ON")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("T_ZN")
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<string>("adress")
+                        .HasColumnType("nvarchar(150)");
+
+                    b.HasKey("K_PRED");
+
+                    b.ToTable("Companies");
+                });
+
             modelBuilder.Entity("webApiReact.Models.User", b =>
                 {
                     b.Property<string>("Id")
