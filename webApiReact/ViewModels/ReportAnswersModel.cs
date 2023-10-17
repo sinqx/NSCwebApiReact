@@ -9,6 +9,8 @@ namespace webApiReact.ViewModels
         public required char Kvaratl { get; set; }
 
         public required int K_PRED { get; set; }
+
+        public int? P0 { get; set; }
         public int? P1 { get; set; }
         public int? P2 { get; set; }
         public int? p3 { get; set; }
