@@ -1,27 +1,25 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 
-const CompanyTable = () => {
+const CompanyTable = ({ kpred }) => {
   const [companyData, setCompanyData] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    fetchCompanyData();
-  }, []);
-
   const fetchCompanyData = () => {
     // Выполнить запрос на получение данных о компании
     axios
-      .get("https://localhost:7100/api/Company/get?kpred=kpred")
+      .get(`https://localhost:7100/api/Company/get/${kpred}`)
       .then((response) => {
         setCompanyData(response.data);
         setLoading(false);
         setError(null);
+        console.log(response.data)
       })
       .catch((error) => {
         setLoading(false);
         setError(error.response.data.detail);
+        console.log(error)
       });
   };
 
@@ -30,38 +28,43 @@ const CompanyTable = () => {
   };
 
   const handleUpdateData = (e) => {
-    const value = e.target;
-    const sanitizedValue = value === "" ? null : newValue;
+    const { value, name } = e.target;
+    const sanitizedValue = value;
 
-    setAnswers((prevAnswers) => ({
+    setCompanyData((prevAnswers) => ({
       ...prevAnswers,
       [name]: sanitizedValue,
     }));
   };
 
   const handleSaveCompanyData = () => {
-    company.k_PRED = report.k_PRED;
-    console.log(company);
-    console.log(report);
+    console.log(companyData);
     axios
-      .put(`https://localhost:7100/api/UserReport/change`, company, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      })
+      .put(
+        `https://localhost:7100/api/UserReport/update/get?kpred=${kpred}`,
+        companyData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      )
       .then(function (response) {
-        console.log("Report saved successfully");
+        console.log("Company data saved successfully");
         console.log(response);
-        console.log(company);
       })
       .catch(function (error) {
         console.log(error);
       });
   };
 
+  useEffect(() => {
+    fetchCompanyData();
+  }, []);
+
   return (
-    <div>
-      <table class="iksweb mb-4">
+    <div> 
+      <table className="iksweb mb-4">
         <tbody>
           <tr>
             <td>
@@ -83,9 +86,9 @@ const CompanyTable = () => {
             </td>
             <td>
               <input
-                type="c2"
-                name="Expr1"
-                value={companyData.Expr1}
+                type="text"
+                name="expr1"
+                value={companyData.expr1}
                 onChange={handleUpdateData}
               />
             </td>
@@ -97,8 +100,8 @@ const CompanyTable = () => {
             <td>
               <input
                 type="checkbox"
-                name="TIP1"
-                value={companyData.TIP1}
+                name="tiP1"
+                value={companyData.tiP1}
                 onChange={handleUpdateData}
               />
             </td>
@@ -110,8 +113,8 @@ const CompanyTable = () => {
             <td>
               <input
                 type="text"
-                name="T_ZN"
-                value={companyData.T_ZN}
+                name="t_ZN"
+                value={companyData.t_ZN}
                 onChange={handleUpdateData}
               />
             </td>
@@ -120,12 +123,14 @@ const CompanyTable = () => {
             <td>
               <strong>Адрес предприятия</strong>
             </td>
-            <td><input
+            <td>
+              <input
                 type="text"
                 name="adress"
                 value={companyData.adress}
                 onChange={handleUpdateData}
-              /></td>
+              />
+            </td>
           </tr>
           <tr>
             <td>
