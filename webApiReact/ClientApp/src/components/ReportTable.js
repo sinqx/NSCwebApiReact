@@ -61,9 +61,9 @@ const ReportTable = ({ report, answers, setAnswers }) => {
             </td>
             <td>
               <strong>
-                {report.tiP2 === 1
+                {report.p0 === 1
                   ? "Базар/рынок"
-                  : report.tiP2 === 2
+                  : report.p0 === 2
                   ? "Торговый центр"
                   : "Место"}{" "}
               </strong>
@@ -73,7 +73,7 @@ const ReportTable = ({ report, answers, setAnswers }) => {
             <td>A</td>
             <td>Б</td>
             <td>В</td>
-            <td>{report.tiP2}</td>
+            <td>{report.p0}</td>
           </tr>
           <tr>
             <td>
@@ -182,7 +182,7 @@ const ReportTable = ({ report, answers, setAnswers }) => {
             <td>07</td>
             <td>м²</td>
             <td>
-              {report.tiP2 === 1 ? (
+              {report.p0 === 1 ? (
                 "Х"
               ) : (
                 <input
@@ -190,7 +190,7 @@ const ReportTable = ({ report, answers, setAnswers }) => {
                   name="p7"
                   value={answers.p7}
                   onChange={handleUpdateAnswers}
-                  readOnly={report.tiP2 === 1}
+                  readOnly={report.p0 === 1}
                 />
               )}
             </td>
@@ -202,7 +202,7 @@ const ReportTable = ({ report, answers, setAnswers }) => {
             <td>08</td>
             <td>сомов</td>
             <td>
-              {report.tiP2 === 2 ? (
+              {report.p0 === 2 ? (
                 "Х"
               ) : (
                 <input
@@ -210,7 +210,7 @@ const ReportTable = ({ report, answers, setAnswers }) => {
                   name="p8"
                   value={answers.p8}
                   onChange={handleUpdateAnswers}
-                  readOnly={report.tiP2 === 2}
+                  readOnly={report.p0 === 2}
                 />
               )}
             </td>
@@ -224,7 +224,7 @@ const ReportTable = ({ report, answers, setAnswers }) => {
             <td>09</td>
             <td>тыс.сомов</td>
             <td>
-              {report.tiP2 === 2 ? (
+              {report.p0 === 2 ? (
                 "Х"
               ) : (
                 <input
@@ -232,7 +232,7 @@ const ReportTable = ({ report, answers, setAnswers }) => {
                   name="p9"
                   value={answers.p9}
                   onChange={handleUpdateAnswers}
-                  readOnly={report.tiP2 === 2}
+                  readOnly={report.p0 === 2}
                 />
               )}
             </td>

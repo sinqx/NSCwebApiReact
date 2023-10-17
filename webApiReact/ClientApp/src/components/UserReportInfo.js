@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { useParams } from "react-router-dom";
 import ReportTable from "./ReportTable";
 import CompanyTable from "./CompanyTable";
 import "./UserReportInfo.css";
@@ -18,20 +17,20 @@ const UserReportInfo = () => {
   const handleSearch = () => {
     axios
       .get(
-        `https://localhost:7100/api/UserReport/getInfo?god=${searchGod}&kpred=${searchK_PRED}&kvaratl=${searchKvaratl}`,
+        `https://localhost:7100/api/UserReport/getAnswers?god=${searchGod}&kpred=${searchK_PRED}&kvaratl=${searchKvaratl}`
       )
       .then(function (response) {
         console.log(response);
         const fetchedReport = response.data;
-        const initialAnswers = {};
+        // const initialAnswers = {};
 
-        for (let i = 1; i <= 10; i++) {
-          const propName = `p${i}`;
-          initialAnswers[propName] = fetchedReport[propName.toLowerCase()];
-        }
+        // for (let i = 1; i <= 10; i++) {
+        //   const propName = `p${i}`;
+        //   initialAnswers[propName] = fetchedReport[propName.toLowerCase()];
+        // }
 
         setReport(fetchedReport);
-        setAnswers(initialAnswers);
+        setAnswers(response.data);
         setSearchResult(true); // Результат поиска найден
         setError(null); // Сбросить ошибку
       })
@@ -99,9 +98,7 @@ const UserReportInfo = () => {
           <div>
             <h2>Адрессная часть</h2>
             <CompanyTable
-              report={report}
-              answers={answers}
-            />
+            kpred={searchK_PRED} />
             {/* ... */}
             <br></br>
             <h2>Редактирование отчета</h2>
