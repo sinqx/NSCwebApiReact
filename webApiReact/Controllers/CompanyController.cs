@@ -28,7 +28,7 @@ namespace webApiReact.Controllers
         }
 
         // GET: api/Company/5
-        [HttpGet("get/{kpred}")]
+        [HttpGet("get/{kpred}")]    
         public async Task<ActionResult<Company>> GetСompany(int kpred)
         {
             if (!Regex.IsMatch(kpred.ToString(), @"^\d{8}$"))
@@ -37,20 +37,20 @@ namespace webApiReact.Controllers
             }
             var company = await _context.Companies.FindAsync(kpred);
 
-            return company is null ? NotFound($"Такого предпиятия не существует. Код предприятия: {company.K_PRED}") : company;
+            return company is null ? NotFound($"Такого предпиятия не существует. Код предприятия: {kpred}") : company;
         }
 
         // PUT: api/Company/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("update/{kpred}")]
-        public async Task<IActionResult> UpdateCompany(Company company)
+        public async Task<IActionResult> UpdateCompany(int kpred, Company company)
         {
             var existingCompany = await _context.Companies.SingleOrDefaultAsync(
-                targerCompany => targerCompany.K_PRED == company.K_PRED);
+                targerCompany => targerCompany.K_PRED == kpred);
 
             if (existingCompany == null)
             {
-                return Problem($"Такого предприятия не существует. Код предприятия: {company.K_PRED}");
+                return Problem($"Такого предприятия не существует. Код предприятия: {kpred}");
             }
 
             _context.Entry(existingCompany).CurrentValues.SetValues(company);
