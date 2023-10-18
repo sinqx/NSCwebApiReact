@@ -41,9 +41,6 @@ const UserReportInfo = () => {
       });
   };
 
-  useEffect(() => {
-    handleSearch();
-  }, []);
 
   return (
     <div>
