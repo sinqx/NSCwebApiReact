@@ -3,7 +3,6 @@ import axios from "axios";
 
 const CompanyTable = ({ kpred }) => {
   const [companyData, setCompanyData] = useState({});
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const fetchCompanyData = () => {
@@ -12,14 +11,12 @@ const CompanyTable = ({ kpred }) => {
       .get(`https://localhost:7100/api/Company/get/${kpred}`)
       .then((response) => {
         setCompanyData(response.data);
-        setLoading(false);
         setError(null);
-        console.log(response.data)
+        console.log(response.data);
       })
       .catch((error) => {
-        setLoading(false);
         setError(error.response.data.detail);
-        console.log(error)
+        console.log(error);
       });
   };
 
@@ -28,11 +25,11 @@ const CompanyTable = ({ kpred }) => {
   };
 
   const handleUpdateData = (e) => {
-    const { value, name } = e.target;
-    const sanitizedValue = value;
-
-    setCompanyData((prevAnswers) => ({
-      ...prevAnswers,
+    const { value, name, checked, type } = e.target;
+    const sanitizedValue = type === "checkbox" ? (checked ? 1 : 0) : value === " " ? "" : value;
+  
+    setCompanyData((prevData) => ({
+      ...prevData,
       [name]: sanitizedValue,
     }));
   };
@@ -40,15 +37,11 @@ const CompanyTable = ({ kpred }) => {
   const handleSaveCompanyData = () => {
     console.log(companyData);
     axios
-      .put(
-        `https://localhost:7100/api/UserReport/update/get?kpred=${kpred}`,
-        companyData,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      )
+      .put(`https://localhost:7100/api/Company/update/${kpred}`, companyData, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
       .then(function (response) {
         console.log("Company data saved successfully");
         console.log(response);
@@ -63,7 +56,12 @@ const CompanyTable = ({ kpred }) => {
   }, []);
 
   return (
-    <div> 
+    <div>
+      {error && (
+          <div>
+            <p>{error}</p>{" "}
+          </div>
+        )}
       <table className="iksweb mb-4">
         <tbody>
           <tr>
@@ -101,7 +99,7 @@ const CompanyTable = ({ kpred }) => {
               <input
                 type="checkbox"
                 name="tiP1"
-                value={companyData.tiP1}
+                checked={companyData.tiP1 === 1}
                 onChange={handleUpdateData}
               />
             </td>
