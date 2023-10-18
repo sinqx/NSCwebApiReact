@@ -43,7 +43,7 @@ namespace webApiReact.Controllers
         // PUT: api/Company/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("update/{kpred}")]
-        public async Task<IActionResult> UpdateCompany(int kpred, Company company)
+        public async Task<ActionResult<Company>> UpdateCompany(int kpred, Company company)
         {
             var existingCompany = await _context.Companies.SingleOrDefaultAsync(
                 targerCompany => targerCompany.K_PRED == kpred);
@@ -57,7 +57,7 @@ namespace webApiReact.Controllers
 
             await _context.SaveChangesAsync();
 
-            return NoContent();
+            return existingCompany;
         }
 
         // POST: api/Company/
