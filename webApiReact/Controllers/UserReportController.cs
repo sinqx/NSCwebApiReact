@@ -149,48 +149,48 @@ namespace webApiReact.Controllers
         }
 
 
-        /// POST by kpred : api/UserReport/create
-        // Создание нового отчёта
-        [HttpPost("create")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(UserReport))]
-        public async Task<ActionResult<UserReport>> CreateUserReport()
-        {
-            int god = DateTime.Now.Year;
-            int month = DateTime.Now.Month;
-            char kvartal = (char)(((month + 2) / 3) + '0');
-
-            if (!ValidateReportYear(god, kvartal))
+            /// POST by kpred : api/UserReport/create
+            // Создание нового отчёта
+            [HttpPost("create")]
+            [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(UserReport))]
+            public async Task<ActionResult<UserReport>> CreateUserReport()
             {
-                return Problem("Вы можете создавать отчёт только за нынешний год.");
+                int god = DateTime.Now.Year;
+                int month = DateTime.Now.Month;
+                char kvartal = (char)(((month + 2) / 3) + '0');
+
+                if (!ValidateReportYear(god, kvartal))
+                {
+                    return Problem("Вы можете создавать отчёт только за нынешний год.");
+                }
+
+                // Получение текущего пользователя
+                //var user = await _userManager.GetUserAsync(User)
+                //  ?? throw new Exception("Пользователь не найден.");
+
+                //Записывай Код предприятия пользователя
+                // int kpred = user.K_PRED;
+                var user = await _userManager.FindByNameAsync("test1");
+                int kpred = 22222222;
+
+                if (UserReportExists(god, kpred, kvartal))
+                {
+                    return await GetUserReportByYearKpredKvartal(god, kpred, kvartal);
+                }
+
+                var userReport = new UserReport
+                {
+                    GOD = god,
+                    K_PRED = kpred,
+                    Kvaratl = kvartal,
+                    User = user,
+                };
+
+                _context.UsersReports.Add(userReport);
+                await _context.SaveChangesAsync();
+
+                return userReport;
             }
-
-            // Получение текущего пользователя
-            //var user = await _userManager.GetUserAsync(User)
-            //  ?? throw new Exception("Пользователь не найден.");
-
-            //Записывай Код предприятия пользователя
-            // int kpred = user.K_PRED;
-            var user = await _userManager.FindByNameAsync("test1");
-            int kpred = 22222222;
-
-            if (UserReportExists(god, kpred, kvartal))
-            {
-                return await GetUserReportByYearKpredKvartal(god, kpred, kvartal);
-            }
-
-            var userReport = new UserReport
-            {
-                GOD = god,
-                K_PRED = kpred,
-                Kvaratl = kvartal,
-                User = user,
-            };
-
-            _context.UsersReports.Add(userReport);
-            await _context.SaveChangesAsync();
-
-            return userReport;
-        }
 
 
         /// POST: api/UserReport/createBy
