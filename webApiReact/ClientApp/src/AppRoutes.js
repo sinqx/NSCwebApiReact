@@ -25,6 +25,10 @@ const AppRoutes = [
     {
         path: '/UserReport/getInfo/:god/:kvaratl/:k_PRED',
         element: <UserReportInfo />
+    },
+    {
+        path: '/UserReportInfo',
+        element: <UserReportInfo />
     }
     
     

@@ -57,6 +57,8 @@ const UserReportInfo = () => {
                     placeholder="____"
                     value={searchGod}
                     onChange={(e) => setSearchGod(e.target.value)}
+                    maxLength="4" 
+                    pattern="\d{4}"  
                   />
                   Номер квартала{" "}
                   <input
@@ -64,6 +66,8 @@ const UserReportInfo = () => {
                     placeholder="__"
                     value={searchKvaratl}
                     onChange={(e) => setSearchKvaratl(e.target.value)}
+                    maxLength="1" 
+                    pattern="\d" 
                   />
                 </h5>
                 <p className="card-text">
@@ -73,6 +77,8 @@ const UserReportInfo = () => {
                     placeholder="00000000"
                     value={searchK_PRED}
                     onChange={(e) => setSearchK_PRED(e.target.value)}
+                    maxLength="8" 
+                    pattern="\d{8}"  
                   />
                 </p>
               </div>
