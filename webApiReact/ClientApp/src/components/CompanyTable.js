@@ -21,16 +21,23 @@ const CompanyTable = ({ kpred }) => {
   };
 
   const handleResetCompanyData = () => {
-    setCompanyData(companyData);
+    setCompanyData({});
   };
 
   const handleUpdateData = (e) => {
     const { value, name, checked, type } = e.target;
-    const sanitizedValue = type === "checkbox" ? (checked ? 1 : 0) : value === " " ? "" : value;
-  
+    const sanitizedValue =
+      type === "checkbox"
+        ? checked
+          ? 1
+          : 0
+        : value.trim() === ""
+        ? ""
+        : value;
+
     setCompanyData((prevData) => ({
       ...prevData,
-      [name]: sanitizedValue,
+      [name]: prevData.hasOwnProperty(name) ? sanitizedValue : "",
     }));
   };
 
@@ -58,10 +65,10 @@ const CompanyTable = ({ kpred }) => {
   return (
     <div>
       {error && (
-          <div>
-            <p>{error}</p>{" "}
-          </div>
-        )}
+        <div>
+          <p>{error}</p>{" "}
+        </div>
+      )}
       <table className="iksweb mb-4">
         <tbody>
           <tr>

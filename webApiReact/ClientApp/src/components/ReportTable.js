@@ -15,11 +15,11 @@ const ReportTable = ({ report, answers, setAnswers }) => {
       return;
     }
     const sanitizedValue = value === "" ? null : newValue;
-
+  
     if (name.startsWith("p")) {
       setAnswers((prevAnswers) => ({
         ...prevAnswers,
-        [name]: sanitizedValue,
+        [name]: sanitizedValue !== null ? sanitizedValue : undefined,
       }));
     }
   };
@@ -79,7 +79,7 @@ const ReportTable = ({ report, answers, setAnswers }) => {
             <td>
               <strong>
                 Число торговых мест и торговых объектов (кроме магазинов),
-                отведенных под торговлю – всего 
+                отведенных под торговлю – всего
               </strong>
             </td>
             <td>01</td>
