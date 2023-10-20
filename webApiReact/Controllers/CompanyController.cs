@@ -24,33 +24,32 @@ namespace webApiReact.Controllers
         public async Task<ActionResult<IEnumerable<Company>>> GetCompanies()
         {
             var companies = await _context.Companies.ToListAsync();
-            return companies is null ? NotFound("Предприятий не найдено") : companies;
+            return companies is null || companies.Count == 0 ? NotFound("Предприятий не найдено") : companies;
         }
 
         // GET: api/Company/5
-        [HttpGet("get/{kpred}")]    
+        [HttpGet("get/{kpred}")]
         public async Task<ActionResult<Company>> GetСompany(int kpred)
         {
             if (!Regex.IsMatch(kpred.ToString(), @"^\d{8}$"))
             {
-                return Problem($"Ошибка ввода Кода предприятия: K_PRED = {kpred}");
+                return BadRequest($"Ошибка ввода Кода предприятия: K_PRED = {kpred}");
             }
             var company = await _context.Companies.FindAsync(kpred);
 
             return company is null ? NotFound($"Такого предпиятия не существует. Код предприятия: {kpred}") : company;
         }
 
-        // PUT: api/Company/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        // PUT: api/Company/update/5
         [HttpPut("update/{kpred}")]
         public async Task<ActionResult<Company>> UpdateCompany(int kpred, Company company)
         {
             var existingCompany = await _context.Companies.SingleOrDefaultAsync(
-                targerCompany => targerCompany.K_PRED == kpred);
+                targetCompany => targetCompany.K_PRED == kpred);
 
             if (existingCompany == null)
             {
-                return Problem($"Такого предприятия не существует. Код предприятия: {kpred}");
+                return NotFound($"Такого предприятия не существует. Код предприятия: {kpred}");
             }
 
             _context.Entry(existingCompany).CurrentValues.SetValues(company);
@@ -61,16 +60,13 @@ namespace webApiReact.Controllers
         }
 
         // POST: api/Company/
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost("create")]
         public async Task<ActionResult<Company>> CreateNewCompany(Company company)
         {
-            var existingCompany = await _context.Companies.SingleOrDefaultAsync(
-                targerCompany => targerCompany.K_PRED == company.K_PRED);
-
-            if (existingCompany != null)
+            bool companyExists = await CompanyExists(company.K_PRED);
+            if (companyExists)
             {
-                return Problem($"Такое предприятие уже существует: {company.K_PRED}");
+                return NotFound($"Такое предприятие уже существует. Код предприятия:{company.K_PRED}");
             }
 
             _context.Companies.Add(company);
@@ -79,9 +75,9 @@ namespace webApiReact.Controllers
             return company;
         }
 
-        private bool CompanyExists(int kpred)
+        private async Task<bool> CompanyExists(int kpred)
         {
-            return (_context.Companies?.Any(e => e.K_PRED == kpred)).GetValueOrDefault();
+            return await _context.Companies.AnyAsync(c => c.K_PRED == kpred);
         }
     }
 }
