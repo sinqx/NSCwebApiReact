@@ -22,12 +22,6 @@ const UserReportInfo = () => {
       .then(function (response) {
         console.log(response);
         const fetchedReport = response.data;
-        // const initialAnswers = {};
-
-        // for (let i = 1; i <= 10; i++) {
-        //   const propName = `p${i}`;
-        //   initialAnswers[propName] = fetchedReport[propName.toLowerCase()];
-        // }
 
         setReport(fetchedReport);
         setAnswers(response.data);

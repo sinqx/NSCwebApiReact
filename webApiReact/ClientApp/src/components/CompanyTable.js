@@ -75,28 +75,13 @@ const CompanyTable = ({ kpred }) => {
             <td>
               <strong>Наименование предприятия/организации</strong>
             </td>
-            <td>
-              {" "}
-              <input
-                type="text"
-                name="name"
-                value={companyData.name}
-                onChange={handleUpdateData}
-              />
-            </td>
+            <td>{companyData.name}</td>
           </tr>
           <tr>
             <td>
               <strong>Вид экономической деятельности</strong>
             </td>
-            <td>
-              <input
-                type="text"
-                name="expr1"
-                value={companyData.expr1}
-                onChange={handleUpdateData}
-              />
-            </td>
+            <td>{companyData.expr1}</td>
           </tr>
           <tr>
             <td>
