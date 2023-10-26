@@ -16,6 +16,12 @@ namespace webApiReact.Models
         [Column(TypeName = "nvarchar(150)")]
         public string? T_ZN { get; set; }
 
+        [Column(TypeName = "nvarchar(150)")]
+        public string? email { get; set; }
+
+        [Column(TypeName = "bit")]
+        public bool? contactDataChange { get; set; }
+
         [Column(TypeName = "bigint")]
         public int? K_NPU { get; set; }
 
