@@ -98,8 +98,6 @@ namespace webApiReact.Controllers
         }
 
 
-
-
         /// GET by god and kvaratl: api/UserReport/getAnswers
         // Получение отчёта по году и кварталу
         [HttpGet("getAnswers")]
@@ -112,40 +110,45 @@ namespace webApiReact.Controllers
                 return Problem("Неверно внесены параметры.");
             }
 
-            var userReport = await _context.UsersReports.SingleOrDefaultAsync(
-                report => report.GOD == god && report.K_PRED == kpred && report.Kvaratl == kvaratl);
 
-            if (userReport == null)
+            //Поиск нужного отчёта. Если такого отчёта не существует, то выдача ошибки, иначе выдача отчёта.
+            //Подробнее см. функцию выше.
+            var result= await GetUserReportByYearKpredKvartal(god, kpred, kvaratl);
+
+            if (result.Value is UserReport)
             {
-                return Problem("Такого отчёта не существует");
-            }
+                UserReport userReport = result.Value;
+                var reportProperties = userReport.GetType().GetProperties()
+                    .Where(p => p.Name.StartsWith("P", StringComparison.OrdinalIgnoreCase)
+                                && char.IsDigit(p.Name[1]))
+                    .ToList();
 
-            var reportProperties = userReport.GetType().GetProperties()
-                .Where(p => p.Name.StartsWith("P", StringComparison.OrdinalIgnoreCase)
-                            && char.IsDigit(p.Name[1]))
-                .ToList();
-
-            var reportAnswers = new ReportAnswersModel
-            {
-                GOD = userReport.GOD,
-                Kvaratl = userReport.Kvaratl,
-                K_PRED = userReport.K_PRED
-            };
-
-            reportAnswers.P0 = userReport.TIP2;
-
-            foreach (var reportProperty in reportProperties)
-            {
-                var reportAnswersProperty = reportAnswers.GetType().GetProperty(reportProperty.Name);
-
-                if (reportAnswersProperty != null && reportAnswersProperty.CanWrite)
+                var reportAnswers = new ReportAnswersModel
                 {
-                    var value = reportProperty.GetValue(userReport);
-                    reportAnswersProperty.SetValue(reportAnswers, value);
-                }
-            }
+                    GOD = userReport.GOD,
+                    Kvaratl = userReport.Kvaratl,
+                    K_PRED = userReport.K_PRED
+                };
 
-            return reportAnswers;
+                reportAnswers.P0 = userReport.TIP2;
+
+                foreach (var reportProperty in reportProperties)
+                {
+                    var reportAnswersProperty = reportAnswers.GetType().GetProperty(reportProperty.Name);
+
+                    if (reportAnswersProperty != null && reportAnswersProperty.CanWrite)
+                    {
+                        var value = reportProperty.GetValue(userReport);
+                        reportAnswersProperty.SetValue(reportAnswers, value);
+                    }
+                }
+
+                return reportAnswers;
+            }
+            else
+            {
+                return result is null ? Problem("NULL ERROR") : result.Result;
+            }
         }
 
 
@@ -200,10 +203,12 @@ namespace webApiReact.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<UserReport>> CreateUserReportByGodKvaratl(int god, char kvartal)
         {
-            var user = await _userManager.GetUserAsync(User)
-                ?? throw new ApplicationException("Пользователь не найден.");
+            // Отключено на время тестирования без логирования
+            //var user = await _userManager.GetUserAsync(User)
+            //    ?? throw new ApplicationException("Пользователь не найден.");
 
-            int kpred = user.K_PRED;
+
+            int kpred = 22222222; //user.K_PRED;
 
             if (!ValidateParameters(god, kpred, kvartal))
             {
@@ -226,7 +231,7 @@ namespace webApiReact.Controllers
                 GOD = god,
                 K_PRED = kpred,
                 Kvaratl = kvartal,
-                User = user,
+                User = null,
             };
 
             _context.UsersReports.Add(userReport);

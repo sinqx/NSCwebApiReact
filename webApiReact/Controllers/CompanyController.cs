@@ -64,7 +64,6 @@ namespace webApiReact.Controllers
         public async Task<ActionResult<Company>> CreateNewCompany(Company company)
         {
 
-
             bool companyExists = await CompanyExists(company.K_PRED);
             if (companyExists)
             {
