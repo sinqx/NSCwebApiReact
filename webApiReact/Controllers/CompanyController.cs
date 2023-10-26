@@ -1,7 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using webApiReact.Models;
+using webApiReact.ViewModels;
 
 namespace webApiReact.Controllers
 {
@@ -49,9 +52,6 @@ namespace webApiReact.Controllers
                 return NotFound($"Такого предприятия не существует. Код предприятия: {kpred}");
             }
 
-            company.NAME = existingCompany.NAME;
-            company.OKD_3 = existingCompany.OKD_3;
-
             _context.Entry(existingCompany).CurrentValues.SetValues(company);
 
             await _context.SaveChangesAsync();
@@ -63,8 +63,6 @@ namespace webApiReact.Controllers
         [HttpPost("create")]
         public async Task<ActionResult<Company>> CreateNewCompany(Company company)
         {
-
-
             bool companyExists = await CompanyExists(company.K_PRED);
             if (companyExists)
             {
