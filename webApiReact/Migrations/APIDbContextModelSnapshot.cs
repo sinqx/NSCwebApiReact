@@ -17,7 +17,7 @@ namespace webApiReact.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.0-rc.1.23419.6")
+                .HasAnnotation("ProductVersion", "7.0.13")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -228,6 +228,12 @@ namespace webApiReact.Migrations
                         .HasColumnType("nvarchar(150)");
 
                     b.Property<string>("adress")
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<bool?>("contactDataChange")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("email")
                         .HasColumnType("nvarchar(150)");
 
                     b.HasKey("K_PRED");
