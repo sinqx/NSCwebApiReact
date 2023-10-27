@@ -91,29 +91,25 @@ namespace webApiReact.Controllers
             // Если отчёт за нынешний год не найден - создаётся новый отчёт,
             // если поиск отчёта другого года - такого отчёта не существует.
             // При нахождении отчёта любого года - его отправка.
-            return userReport == null ? (god == DateTime.Now.Year
+
+
+            return userReport ?? (ValidateReportYear(god, kvaratl)
                 ? await CreateUserReportByGodKvaratl(god, kvaratl)
-                : Problem("Такого отчёта не существует"))
-                : userReport;
+                : Problem("Такого отчёта не существует"));
         }
 
 
         /// GET by god and kvaratl: api/UserReport/getAnswers
-        // Получение отчёта по году и кварталу
+        // Получение данных отчёта по году, коду предприятия и кварталу
         [HttpGet("getAnswers")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ReportAnswersModel))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<ReportAnswersModel>> GetUserReportAnswersByYearKpredKvartal(int god, int kpred, char kvaratl)
         {
-            if (!ValidateParameters(god, kpred, kvaratl))
-            {
-                return Problem("Неверно внесены параметры.");
-            }
-
-
+          
             //Поиск нужного отчёта. Если такого отчёта не существует, то выдача ошибки, иначе выдача отчёта.
             //Подробнее см. функцию выше.
-            var result= await GetUserReportByYearKpredKvartal(god, kpred, kvaratl);
+            var result = await GetUserReportByYearKpredKvartal(god, kpred, kvaratl);
 
             if (result.Value is UserReport)
             {
@@ -152,48 +148,48 @@ namespace webApiReact.Controllers
         }
 
 
-            /// POST by kpred : api/UserReport/create
-            // Создание нового отчёта
-            [HttpPost("create")]
-            [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(UserReport))]
-            public async Task<ActionResult<UserReport>> CreateUserReport()
+        /// POST by kpred : api/UserReport/create
+        // Создание нового отчёта
+        [HttpPost("create")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(UserReport))]
+        public async Task<ActionResult<UserReport>> CreateUserReport()
+        {
+            int god = DateTime.Now.Year;
+            int month = DateTime.Now.Month;
+            char kvartal = (char)(((month + 2) / 3) + '0');
+
+            if (!ValidateReportYear(god, kvartal))
             {
-                int god = DateTime.Now.Year;
-                int month = DateTime.Now.Month;
-                char kvartal = (char)(((month + 2) / 3) + '0');
-
-                if (!ValidateReportYear(god, kvartal))
-                {
-                    return Problem("Вы можете создавать отчёт только за нынешний год.");
-                }
-
-                // Получение текущего пользователя
-                //var user = await _userManager.GetUserAsync(User)
-                //  ?? throw new Exception("Пользователь не найден.");
-
-                //Записывай Код предприятия пользователя
-                // int kpred = user.K_PRED;
-                var user = await _userManager.FindByNameAsync("test1");
-                int kpred = 22222222;
-
-                if (UserReportExists(god, kpred, kvartal))
-                {
-                    return await GetUserReportByYearKpredKvartal(god, kpred, kvartal);
-                }
-
-                var userReport = new UserReport
-                {
-                    GOD = god,
-                    K_PRED = kpred,
-                    Kvaratl = kvartal,
-                    User = user,
-                };
-
-                _context.UsersReports.Add(userReport);
-                await _context.SaveChangesAsync();
-
-                return userReport;
+                return Problem("Вы можете создавать отчёт только за нынешний год.");
             }
+
+            // Получение текущего пользователя
+            //var user = await _userManager.GetUserAsync(User)
+            //  ?? throw new Exception("Пользователь не найден.");
+
+            //Записывай Код предприятия пользователя
+            // int kpred = user.K_PRED;
+            var user = await _userManager.FindByNameAsync("test1");
+            int kpred = 22222222;
+
+            if (UserReportExists(god, kpred, kvartal))
+            {
+                return await GetUserReportByYearKpredKvartal(god, kpred, kvartal);
+            }
+
+            var userReport = new UserReport
+            {
+                GOD = god,
+                K_PRED = kpred,
+                Kvaratl = kvartal,
+                User = user,
+            };
+
+            _context.UsersReports.Add(userReport);
+            await _context.SaveChangesAsync();
+
+            return userReport;
+        }
 
 
         /// POST: api/UserReport/createBy
@@ -207,7 +203,7 @@ namespace webApiReact.Controllers
             //var user = await _userManager.GetUserAsync(User)
             //    ?? throw new ApplicationException("Пользователь не найден.");
 
-
+            var user = await _userManager.FindByNameAsync("test1");
             int kpred = 22222222; //user.K_PRED;
 
             if (!ValidateParameters(god, kpred, kvartal))
@@ -220,18 +216,18 @@ namespace webApiReact.Controllers
                 return Problem("Вы можете создавать отчёт только за нынешний год.");
             }
 
-            var existingReport = await GetUserReportByYearKpredKvartal(god, kpred, kvartal);
-            if (existingReport != null)
+            if (UserReportExists(god, kpred, kvartal))
             {
-                return existingReport;
+                return await GetUserReportByYearKpredKvartal(god, kpred, kvartal);
             }
+
 
             var userReport = new UserReport
             {
                 GOD = god,
                 K_PRED = kpred,
                 Kvaratl = kvartal,
-                User = null,
+                User = user,
             };
 
             _context.UsersReports.Add(userReport);
@@ -441,6 +437,7 @@ namespace webApiReact.Controllers
             return Ok("Отчёт удалён");
         }
 
+
         //Проверка, существует ли отчёт с такими параметрами
         private bool UserReportExists(int god, int kpred, char kvaratl)
         {
@@ -461,7 +458,7 @@ namespace webApiReact.Controllers
         {
             bool isGodValid = Regex.IsMatch(god.ToString(), @"^\d{4}$") && god > 2000 && god <= DateTime.Now.Year;
             bool isKpredValid = Regex.IsMatch(kpred.ToString(), @"^\d{8}$");
-            bool isKvartalhValid = Regex.IsMatch(kvaratl.ToString(), @"^\d{1}$") && kvaratl > 48 && kvaratl < 61;
+            bool isKvartalhValid = Regex.IsMatch(kvaratl.ToString(), @"^\d{1}$") && kvaratl > 48 && kvaratl < 53;
 
             return isGodValid && isKpredValid && isKvartalhValid;
         }
