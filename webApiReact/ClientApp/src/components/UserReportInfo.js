@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import axios from "axios";
 import ReportTable from "./ReportTable";
 import CompanyTable from "./CompanyTable";
@@ -7,7 +7,6 @@ import "./UserReportInfo.css";
 const UserReportInfo = () => {
   const currentYear = new Date().getFullYear();
   const [error, setError] = useState(null);
-  const [report, setReport] = useState({});
   const [answers, setAnswers] = useState({});
   const [searchGod, setSearchGod] = useState(currentYear.toString());
   const [searchK_PRED, setSearchK_PRED] = useState("");
@@ -21,9 +20,7 @@ const UserReportInfo = () => {
       )
       .then(function (response) {
         console.log(response);
-        const fetchedReport = response.data;
-
-        setReport(fetchedReport);
+        
         setAnswers(response.data);
         setSearchResult(true); // Результат поиска найден
         setError(null); // Сбросить ошибку
@@ -99,8 +96,7 @@ const UserReportInfo = () => {
             {/* ... */}
             <br></br>
             <h2>Редактирование отчета</h2>
-            <ReportTable
-              report={report}
+            <ReportTable           
               answers={answers}
               setAnswers={setAnswers}
             />

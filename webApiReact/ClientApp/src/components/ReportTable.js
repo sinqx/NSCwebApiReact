@@ -1,9 +1,10 @@
 import React from "react";
 import axios from "axios";
 
-const ReportTable = ({ report, answers, setAnswers }) => {
-  const handleResetReport = () => {
-    setAnswers(report);
+const answersTable = ({ answers, setAnswers }) => {
+  const handleResetanswers = () => {
+    setAnswers(null)
+    setAnswers(answers);
   };
 
   const handleUpdateAnswers = (e) => {
@@ -24,20 +25,20 @@ const ReportTable = ({ report, answers, setAnswers }) => {
     }
   };
 
-  const handleSaveReport = () => {
-    answers.GOD = report.god;
-    answers.k_PRED = report.k_PRED;
-    answers.Kvaratl = report.kvaratl;
+  const handleSaveanswers = () => {
+    answers.GOD = answers.god;
+    answers.k_PRED = answers.k_PRED;
+    answers.Kvaratl = answers.kvaratl;
     console.log(answers);
-    console.log(report);
+    console.log(answers);
     axios
-      .put(`https://localhost:7100/api/UserReport/change`, answers, {
+      .put(`https://localhost:7100/api/Useranswers/change`, answers, {
         headers: {
           "Content-Type": "application/json",
         },
       })
       .then(function (response) {
-        console.log("Report saved successfully");
+        console.log("answers saved successfully");
         console.log(response);
         console.log(answers);
       })
@@ -61,9 +62,9 @@ const ReportTable = ({ report, answers, setAnswers }) => {
             </td>
             <td>
               <strong>
-                {report.p0 === 1
+                {answers.p0 === 1
                   ? "Базар/рынок"
-                  : report.p0 === 2
+                  : answers.p0 === 2
                   ? "Торговый центр"
                   : "Место"}{" "}
               </strong>
@@ -73,7 +74,7 @@ const ReportTable = ({ report, answers, setAnswers }) => {
             <td>A</td>
             <td>Б</td>
             <td>В</td>
-            <td>{report.p0}</td>
+            <td>{answers.p0}</td>
           </tr>
           <tr>
             <td>
@@ -88,7 +89,7 @@ const ReportTable = ({ report, answers, setAnswers }) => {
               <input
                 type="number"
                 name="p1"
-                value={answers.p1}
+                value={answers.p1  || ""}
                 onChange={handleUpdateAnswers}
               />
             </td>
@@ -105,7 +106,7 @@ const ReportTable = ({ report, answers, setAnswers }) => {
               <input
                 type="number"
                 name="p2"
-                value={answers.p2}
+                value={answers.p2  || ""}
                 onChange={handleUpdateAnswers}
               />
             </td>
@@ -120,7 +121,7 @@ const ReportTable = ({ report, answers, setAnswers }) => {
               <input
                 type="number"
                 name="p3"
-                value={answers.p3}
+                value={answers.p3  || ""}
                 onChange={handleUpdateAnswers}
               />
             </td>
@@ -137,7 +138,7 @@ const ReportTable = ({ report, answers, setAnswers }) => {
               <input
                 type="number"
                 name="p4"
-                value={answers.p4}
+                value={answers.p4  || ""}
                 onChange={handleUpdateAnswers}
               />
             </td>
@@ -152,7 +153,7 @@ const ReportTable = ({ report, answers, setAnswers }) => {
               <input
                 type="number"
                 name="p5"
-                value={answers.p5}
+                value={answers.p5 === null ? "" : answers.p5}
                 onChange={handleUpdateAnswers}
               />
             </td>
@@ -167,7 +168,7 @@ const ReportTable = ({ report, answers, setAnswers }) => {
               <input
                 type="number"
                 name="p6"
-                value={answers.p6}
+                value={answers.p6  || ""}
                 onChange={handleUpdateAnswers}
               />
             </td>
@@ -182,15 +183,15 @@ const ReportTable = ({ report, answers, setAnswers }) => {
             <td>07</td>
             <td>м²</td>
             <td>
-              {report.p0 === 1 ? (
+              {answers.p0 === 1 ? (
                 "Х"
               ) : (
                 <input
                   type="number"
                   name="p7"
-                  value={answers.p7}
+                  value={answers.p7  || ""}
                   onChange={handleUpdateAnswers}
-                  readOnly={report.p0 === 1}
+                  readOnly={answers.p0 === 1}
                 />
               )}
             </td>
@@ -202,15 +203,15 @@ const ReportTable = ({ report, answers, setAnswers }) => {
             <td>08</td>
             <td>сомов</td>
             <td>
-              {report.p0 === 2 ? (
+              {answers.p0 === 2 ? (
                 "Х"
               ) : (
                 <input
                   type="number"
                   name="p8"
-                  value={answers.p8}
+                  value={answers.p8  || ""}
                   onChange={handleUpdateAnswers}
-                  readOnly={report.p0 === 2}
+                  readOnly={answers.p0 === 2}
                 />
               )}
             </td>
@@ -224,15 +225,15 @@ const ReportTable = ({ report, answers, setAnswers }) => {
             <td>09</td>
             <td>тыс.сомов</td>
             <td>
-              {report.p0 === 2 ? (
+              {answers.p0 === 2 ? (
                 "Х"
               ) : (
                 <input
                   type="number"
                   name="p9"
-                  value={answers.p9}
+                  value={answers.p9  || ""}
                   onChange={handleUpdateAnswers}
-                  readOnly={report.p0 === 2}
+                  readOnly={answers.p0 === 2}
                 />
               )}
             </td>
@@ -247,7 +248,7 @@ const ReportTable = ({ report, answers, setAnswers }) => {
               <input
                 type="number"
                 name="p10"
-                value={answers.p10}
+                value={answers.p10  || ""}
                 onChange={handleUpdateAnswers}
               />
             </td>
@@ -256,10 +257,10 @@ const ReportTable = ({ report, answers, setAnswers }) => {
       </table>
       {/* Кнопка сохранения отчета */}
       <div className="buttons-container">
-        <button className="btn btn-save" onClick={handleSaveReport}>
+        <button className="btn btn-save" onClick={handleSaveanswers}>
           Сохранить
         </button>
-        <button className="btn btn-reset" onClick={handleResetReport}>
+        <button className="btn btn-reset" onClick={handleResetanswers}>
           Сбросить
         </button>
       </div>
@@ -267,4 +268,4 @@ const ReportTable = ({ report, answers, setAnswers }) => {
   );
 };
 
-export default ReportTable;
+export default answersTable;

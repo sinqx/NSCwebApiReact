@@ -104,7 +104,7 @@ const CompanyTable = ({ kpred }) => {
               <input
                 type="text"
                 name="t_ZN"
-                value={companyData.t_ZN}
+                value={companyData.t_ZN  || ""}
                 onChange={handleUpdateData}
               />
             </td>
@@ -117,7 +117,7 @@ const CompanyTable = ({ kpred }) => {
               <input
                 type="text"
                 name="adress"
-                value={companyData.adress}
+                value={companyData.adress  || ""}
                 onChange={handleUpdateData}
               />
             </td>
@@ -126,19 +126,34 @@ const CompanyTable = ({ kpred }) => {
             <td>
               <strong>Электронная почта</strong>
             </td>
-            <td>С6</td>
+            <td><input
+                type="text"
+                name="email"
+                value={companyData.email  || ""}
+                onChange={handleUpdateData}
+              /></td>
           </tr>
           <tr>
             <td>
               <strong>Номер телефона исполнителя</strong>
             </td>
-            <td>С7</td>
+            <td><input
+                type="number"
+                name="t_ON"
+                value={companyData.t_ON  || ""}
+                onChange={handleUpdateData}
+              /></td>
           </tr>
           <tr>
             <td>
-              <strong>Имя исполнителя (ФИО)</strong>
+              <strong>Имя исполнителя (ФИО)</strong>  
             </td>
-            <td>С8</td>
+            <td><input
+                type="text"
+                name="f_I_O"
+                value={companyData.f_I_O  || ""}
+                onChange={handleUpdateData}
+              /></td>
           </tr>
         </tbody>
       </table>
