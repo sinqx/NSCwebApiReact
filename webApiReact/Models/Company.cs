@@ -23,28 +23,28 @@ namespace webApiReact.Models
         public bool? contactDataChange { get; set; }
 
         [Column(TypeName = "bigint")]
-        public int? K_NPU { get; set; }
+        public long? K_NPU { get; set; }
 
         [Column(TypeName = "nvarchar(150)")]
         public string? adress { get; set; }
 
         [Column(TypeName = "bigint")]
-        public int? FSOB { get; set; }
+        public long? FSOB { get; set; }
 
         [Column(TypeName = "bigint")]
-        public int? KTPP { get; set; }
+        public long? KTPP { get; set; }
 
         [Column(TypeName = "bigint")]
-        public int? KTP { get; set; }
+        public long? KTP { get; set; }
 
         [Column(TypeName = "bigint")]
-        public int? KTP1 { get; set; }
+        public long? KTP1 { get; set; }
 
         [Column(TypeName = "bigint")]
-        public int? KTP2 { get; set; }
+        public long? KTP2 { get; set; }
 
         [Column(TypeName = "bigint")]
-        public int? KTP3 { get; set; }
+        public long? KTP3 { get; set; }
 
         [Required]
         [Column(TypeName = "varchar(10)")]
@@ -54,19 +54,19 @@ namespace webApiReact.Models
         public string? F_I_O { get; set; }
 
         [Column(TypeName = "bigint")]
-        public int? T_ON { get; set; }
+        public long? T_ON { get; set; }
 
         [Column(TypeName = "bigint")]
-        public int? TIP1 { get; set; }
+        public long? TIP1 { get; set; }
 
         [Column(TypeName = "bigint")]
-        public int? TIP2 { get; set; }
+        public long? TIP2 { get; set; }
 
         [Column(TypeName = "bigint")]
-        public int? TIP3 { get; set; }
+        public long? TIP3 { get; set; }
 
         [Column(TypeName = "bigint")]
-        public int? GR { get; set; }
+        public long? GR { get; set; }
 
         [Column(TypeName = "nvarchar(150)")]
         public string? STATUS1 { get; set; }
