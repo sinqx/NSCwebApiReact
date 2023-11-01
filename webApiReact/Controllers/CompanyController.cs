@@ -41,22 +41,22 @@ namespace webApiReact.Controllers
         [HttpPut("update/{kpred}")]
         public async Task<ActionResult<Company>> UpdateCompany(int kpred, Company company)
         {
-            var existingCompany = await _context.Companies.SingleOrDefaultAsync(
+            var udpateCompany = await _context.Companies.SingleOrDefaultAsync(
                 targetCompany => targetCompany.K_PRED == kpred);
 
-            if (existingCompany == null)
+            if (udpateCompany == null)
             {
                 return NotFound($"Такого предприятия не существует. Код предприятия: {kpred}");
             }
 
-            company.NAME = existingCompany.NAME;
-            company.OKD_3 = existingCompany.OKD_3;
+            company.NAME = udpateCompany.NAME;
+            company.OKD_3 = udpateCompany.OKD_3;
 
-            _context.Entry(existingCompany).CurrentValues.SetValues(company);
+            _context.Entry(udpateCompany).CurrentValues.SetValues(company);
 
             await _context.SaveChangesAsync();
 
-            return existingCompany;
+            return udpateCompany;
         }
 
         // POST: api/Company/
@@ -64,8 +64,7 @@ namespace webApiReact.Controllers
         public async Task<ActionResult<Company>> CreateNewCompany(Company company)
         {
 
-            bool companyExists = await CompanyExists(company.K_PRED);
-            if (companyExists)
+            if (await _context.Companies.AnyAsync(c => c.K_PRED == company.K_PRED))
             {
                 return NotFound($"Такое предприятие уже существует. Код предприятия:{company.K_PRED}");
             }
@@ -73,12 +72,33 @@ namespace webApiReact.Controllers
             _context.Companies.Add(company);
             await _context.SaveChangesAsync();
 
-            return company;
+            return Ok("Предприятие создано:\n" + company);
         }
 
-        private async Task<bool> CompanyExists(int kpred)
+        //DELTE: api/Company/delete
+        [HttpDelete("delete")]
+        public async Task<IActionResult> DeleteCompany(int kpred)
         {
-            return await _context.Companies.AnyAsync(c => c.K_PRED == kpred);
+            if (kpred.ToString().Length != 8)
+            {
+                return BadRequest($"Неверно введен код предприятия: {kpred}");
+            }
+
+            var company = await _context.Companies.SingleOrDefaultAsync(
+                targetCompany => targetCompany.K_PRED == kpred);
+
+            // Если отчёт не найден, возвращаем ошибку NotFound с сообщением.
+            if (company == null)
+            {
+                return NotFound("Такого предприятия не существует не существует");
+            }
+
+            // Удаляем отчёт из контекста базы данных.
+            _context.Companies.Remove(company);
+            await _context.SaveChangesAsync();
+
+            // Возвращаем ответ NoContent (код 204) без тела ответа.
+            return Ok("Предприятие удалено");
         }
     }
 }

@@ -94,10 +94,8 @@ namespace webApiReact.Controllers
 
             // Если отчёт за нынешний год не найден - создаётся новый отчёт,
             // если поиск отчёта другого года - такого отчёта не существует.
-            // При нахождении отчёта любого года - его отправка.
-
-
-            return userReport ?? (ValidateReportYear(god, kvaratl)
+            // При нахождении отчёта любого года - его отправка
+            return Ok("Найден отчёт:\n" + userReport) ?? (ValidateReportYear(god, kvaratl)
                 ? await CreateUserReportByGodKvaratl(god, kvaratl)
                 : Problem("Такого отчёта не существует"));
         }
@@ -152,14 +150,13 @@ namespace webApiReact.Controllers
             {
                 // Если результат равен null, возвращаем проблему "NULL ERROR",
                 // иначе возвращаем проблему полученную из функции поиска отчёта.
-                return result.Result is null ? Problem("NULL ERROR") : result.Result;
+                return result.Result is null ? Problem("NULL ERROR") : Ok("Ошибка: " + result.Result);
             }
         }
 
 
         /// POST by kpred : api/UserReport/create
         // Создание нового отчёта
-
         [HttpPost("create")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(UserReport))]
         public async Task<ActionResult<UserReport>> CreateUserReport()
@@ -200,7 +197,7 @@ namespace webApiReact.Controllers
             _context.UsersReports.Add(userReport);
             await _context.SaveChangesAsync();
 
-            return userReport;
+            return Ok("Создан новый отчёт:\n" + userReport);
         }
 
 
@@ -236,7 +233,6 @@ namespace webApiReact.Controllers
                 return await GetUserReportByYearKpredKvartal(god, kpred, kvartal);
             }
 
-
             var userReport = new UserReport
             {
                 GOD = god,
@@ -248,7 +244,7 @@ namespace webApiReact.Controllers
             _context.UsersReports.Add(userReport);
             await _context.SaveChangesAsync();
 
-            return userReport;
+            return Ok("Создан новый отчёт:\n" + userReport);
         }
 
         /// PUT: api/UserReport/replace
